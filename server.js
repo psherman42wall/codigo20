@@ -4,265 +4,319 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server);
 
-// Configuração do Socket.io com tolerância a quedas de conexão móvel (Celular)
-const io = new Server(server, {
-  pingTimeout: 30000,
-  pingInterval: 10000
-});
+app.use(express.static('public'));
 
-app.use(express.static(__dirname));
-
+const BANCO_DE_CARTAS = require('./public/cartas.js');
 const rooms = {};
-const disconnectTimers = {};
 
-const palavrasPadrao = [
-  { id: 1, nome: "Abstrato 1", imageUrl: "cartas/carta_1.png" },
-  { id: 2, nome: "Abstrato 2", imageUrl: "cartas/carta_2.png" },
-  { id: 3, nome: "Abstrato 3", imageUrl: "cartas/carta_3.png" },
-  { id: 4, nome: "Abstrato 4", imageUrl: "cartas/carta_4.png" },
-  { id: 5, nome: "Abstrato 5", imageUrl: "cartas/carta_5.png" },
-  { id: 6, nome: "Abstrato 6", imageUrl: "cartas/carta_6.png" },
-  { id: 7, nome: "Abstrato 7", imageUrl: "cartas/carta_7.png" },
-  { id: 8, nome: "Abstrato 8", imageUrl: "cartas/carta_8.png" },
-  { id: 9, nome: "Abstrato 9", imageUrl: "cartas/carta_9.png" },
-  { id: 10, nome: "Abstrato 10", imageUrl: "cartas/carta_10.png" },
-  { id: 11, nome: "Abstrato 11", imageUrl: "cartas/carta_11.png" },
-  { id: 12, nome: "Abstrato 12", imageUrl: "cartas/carta_12.png" },
-  { id: 13, nome: "Abstrato 13", imageUrl: "cartas/carta_13.png" },
-  { id: 14, nome: "Abstrato 14", imageUrl: "cartas/carta_14.png" },
-  { id: 15, nome: "Abstrato 15", imageUrl: "cartas/carta_15.png" },
-  { id: 16, nome: "Abstrato 16", imageUrl: "cartas/carta_16.png" },
-  { id: 17, nome: "Abstrato 17", imageUrl: "cartas/carta_17.png" },
-  { id: 18, nome: "Abstrato 18", imageUrl: "cartas/carta_18.png" },
-  { id: 19, nome: "Abstrato 19", imageUrl: "cartas/carta_19.png" },
-  { id: 20, nome: "Abstrato 20", imageUrl: "cartas/carta_20.png" },
-  { id: 21, nome: "Abstrato 21", imageUrl: "cartas/carta_21.png" },
-  { id: 22, nome: "Abstrato 22", imageUrl: "cartas/carta_22.png" },
-  { id: 23, nome: "Abstrato 23", imageUrl: "cartas/carta_23.png" },
-  { id: 24, nome: "Abstrato 24", imageUrl: "cartas/carta_24.png" },
-  { id: 25, nome: "Abstrato 25", imageUrl: "cartas/carta_25.png" }
-];
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
 
-function gerarTabuleiro(gameMode) {
-  let embaralhadas = [...palavrasPadrao].sort(() => Math.random() - 0.5).slice(0, 20);
-  let tipos = [];
-  for(let i=0; i<7; i++) tipos.push('azul');
-  for(let i=0; i<7; i++) tipos.push('amarelo');
-  for(let i=0; i<5; i++) tipos.push('branca');
-  tipos.push('preta');
+// Gera o tabuleiro equilibrado conforme o time que começa
+function createNewGame(starterTeam) {
+  const starterCardsCount = 8;
+  const secondCardsCount = 7;
+  const neutralCardsCount = 4;
+  const bombCardsCount = 1;
 
-  tipos.sort(() => Math.random() - 0.5);
+  let types = [];
+  if (starterTeam === 'azul') {
+    types = [
+      ...Array(starterCardsCount).fill('azul'),
+      ...Array(secondCardsCount).fill('amarelo'),
+      ...Array(neutralCardsCount).fill('branca'),
+      ...Array(bombCardsCount).fill('preta')
+    ];
+  } else {
+    types = [
+      ...Array(starterCardsCount).fill('amarelo'),
+      ...Array(secondCardsCount).fill('azul'),
+      ...Array(neutralCardsCount).fill('branca'),
+      ...Array(bombCardsCount).fill('preta')
+    ];
+  }
 
-  return embaralhadas.map((carta, index) => ({
-    id: carta.id,
-    nome: carta.nome,
-    imageUrl: carta.imageUrl,
-    type: tipos[index],
-    revealed: false
+  const shuffledTypes = shuffle(types);
+  const cartasLocais = shuffle([...BANCO_DE_CARTAS]).slice(0, 20);
+
+  return cartasLocais.map((cartaInfo, index) => ({
+    id: index,
+    nome: cartaInfo.nome,
+    type: shuffledTypes[index],
+    revealed: false,
+    tags: cartaInfo.tags,
+    imageUrl: cartaInfo.url
   }));
 }
 
-function broadcastPublicRooms() {
-  const publicRooms = [];
-  for (let rId in rooms) {
-    if (!rooms[rId].isPrivate && rooms[rId].status === 'waiting') {
-      publicRooms.push({
-        id: rId,
-        creatorName: rooms[rId].creatorName || 'Agente',
-        gameMode: rooms[rId].gameMode,
-        isPrivate: rooms[rId].isPrivate,
-        playersCount: rooms[rId].players.length,
-        maxPlayers: rooms[rId].gameMode === 'dupla' ? 2 : 4
-      });
-    }
-  }
-  io.emit('public_rooms_list', publicRooms);
+function broadcastRoomsList() {
+  const roomsList = Object.values(rooms).map(r => ({
+    id: r.id,
+    creatorName: r.creatorName || "Agente",
+    playersCount: r.players.length,
+    maxPlayers: r.gameMode === 'dupla' ? 2 : 4,
+    gameMode: r.gameMode || 'dupla',
+    isPrivate: r.isPrivate
+  }));
+
+  io.emit('public_rooms_list', roomsList);
 }
 
 io.on('connection', (socket) => {
-  socket.on('get_public_rooms', () => {
-    broadcastPublicRooms();
-  });
+  broadcastRoomsList();
+
+  socket.on('get_public_rooms', () => broadcastRoomsList());
 
   socket.on('get_room_slots', ({ roomId }) => {
-    if (rooms[roomId]) {
-      const max = rooms[roomId].gameMode === 'dupla' ? 2 : 4;
-      socket.emit('room_slots_info', {
-        occupiedSlots: rooms[roomId].players.map(p => ({ team: p.team, role: p.role })),
-        isFull: rooms[roomId].players.length >= max,
-        isPrivate: rooms[roomId].isPrivate,
-        gameMode: rooms[roomId].gameMode
-      });
+    const room = rooms[roomId];
+    if (!room) {
+      socket.emit('room_slots_info', { occupiedSlots: [], isFull: false, isPrivate: false, gameMode: null });
     } else {
-      socket.emit('room_slots_info', { occupiedSlots: [], isFull: false, isPrivate: false });
+      const occupiedSlots = room.players.map(p => ({ team: p.team, role: p.role }));
+      const maxP = room.gameMode === 'dupla' ? 2 : 4;
+      socket.emit('room_slots_info', { occupiedSlots, isFull: room.players.length >= maxP, isPrivate: room.isPrivate, gameMode: room.gameMode });
     }
   });
 
-  socket.on('join_room', (data) => {
-    const { roomId, playerName, gameMode, team, role, avatarId, isPrivate, password } = data;
+  socket.on('join_room', ({ roomId, playerName, gameMode, team, role, avatarId, isPrivate, password }) => {
+    let room = rooms[roomId];
 
-    if (!rooms[roomId]) {
+    if (!room) {
       rooms[roomId] = {
         id: roomId,
-        gameMode: gameMode || 'dupla',
-        isPrivate: !!isPrivate,
-        password: password || '',
         creatorName: playerName,
-        status: 'waiting',
-        players: [],
-        cards: gerarTabuleiro(gameMode),
-        currentTurn: 'azul',
+        gameMode: gameMode || 'dupla',
+        status: 'waiting', // waiting, jokenpo, choice, playing
+        cards: [],
+        currentTurn: null,
         activeClue: null,
         clicksRemaining: 0,
-        jokenpoChoices: {}
+        players: [],
+        isPrivate: isPrivate || false,
+        password: password || "",
+        jokenpo: { azul: null, amarelo: null }
       };
-    }
+      room = rooms[roomId];
+    } else {
+      if (room.isPrivate && room.password && room.password !== password) {
+        socket.emit('error_message', 'Senha incorreta!');
+        return;
+      }
 
-    const room = rooms[roomId];
+      const maxP = room.gameMode === 'dupla' ? 2 : 4;
 
-    if (room.isPrivate && room.password && room.password !== password) {
-      socket.emit('error_message', 'Senha incorreta para esta sala fechada!');
-      return;
-    }
+      if (room.gameMode === 'dupla') {
+        if (room.players.some(p => p.role === role && p.id !== socket.id)) {
+          socket.emit('error_message', `A vaga de ${role.toUpperCase()} já está ocupada!`);
+          return;
+        }
+      } else {
+        if (room.players.some(p => p.team === team && p.role === role && p.id !== socket.id)) {
+          socket.emit('error_message', `A vaga de ${role.toUpperCase()} do Time ${team.toUpperCase()} já está ocupada!`);
+          return;
+        }
+      }
 
-    const maxP = room.gameMode === 'dupla' ? 2 : 4;
-    if (room.players.length >= maxP) {
-      socket.emit('error_message', 'Esta sala já está cheia!');
-      return;
+      if (!room.players.some(p => p.id === socket.id) && room.players.length >= maxP) {
+        socket.emit('error_message', `A sala já está cheia (${maxP}/${maxP})!`);
+        return;
+      }
     }
 
     socket.join(roomId);
-    socket.roomId = roomId;
-    socket.playerName = playerName;
 
+    room.players = room.players.filter(p => p.id !== socket.id);
     room.players.push({
       id: socket.id,
       name: playerName,
-      team: room.gameMode === 'dupla' ? 'azul' : team,
-      role: role,
-      avatarId: avatarId || 1
+      team: room.gameMode === 'dupla' ? 'azul' : (team || 'azul'),
+      role,
+      avatarId
     });
 
-    socket.emit('init_state', { room });
-    io.to(roomId).emit('update_players', room.players);
-    broadcastPublicRooms();
+    const maxPlayers = room.gameMode === 'dupla' ? 2 : 4;
 
-    if (room.status === 'waiting' && room.players.length === maxP) {
-      if (room.gameMode === 'confronto') {
-        room.status = 'jokenpo';
-        io.to(roomId).emit('start_jokenpo_phase', { room });
-      } else {
+    // Responde ao jogador que acabou de entrar imediatamente para mudar a tela dele no ato
+    socket.emit('init_state', { room });
+
+    // Atualiza a lista de todos os jogadores na sala
+    io.to(roomId).emit('update_players', room.players);
+
+    // Se completou a sala, dispara a fase seguinte
+    if (room.players.length === maxPlayers && room.status === 'waiting') {
+      if (room.gameMode === 'dupla') {
         room.status = 'playing';
+        room.currentTurn = 'jogadores';
+        room.cards = createNewGame('azul');
         io.to(roomId).emit('game_ready', { room });
-        io.to(roomId).emit('log_message', `🎯 Partida iniciada na sala <strong>${roomId}</strong>!`);
+      } else {
+        room.status = 'jokenpo';
+        room.jokenpo = { azul: null, amarelo: null };
+        io.to(roomId).emit('start_jokenpo_phase', { room });
       }
+    } else {
+      io.to(roomId).emit('room_waiting_state', { room });
     }
+
+    broadcastRoomsList();
   });
 
+  // Lógica do Pedra, Papel ou Tesoura
   socket.on('send_jokenpo_choice', ({ roomId, choice }) => {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room || room.status !== 'jokenpo') return;
 
-    room.jokenpoChoices[socket.id] = choice;
-    const observadores = room.players.filter(p => p.role === 'observador');
+    const player = room.players.find(p => p.id === socket.id);
+    if (!player || player.role !== 'observador') return;
 
-    if (Object.keys(room.jokenpoChoices).length >= observadores.length) {
-      const [p1, p2] = observadores;
-      const c1 = room.jokenpoChoices[p1.id];
-      const c2 = room.jokenpoChoices[p2.id];
+    room.jokenpo[player.team] = choice;
 
-      if (c1 === c2) {
-        room.jokenpoChoices = {};
+    io.to(roomId).emit('log_message', `✊ <strong>${player.name}</strong> (Time ${player.team.toUpperCase()}) fez sua escolha no Pedra, Papel ou Tesoura!`);
+
+    if (room.jokenpo.azul && room.jokenpo.amarelo) {
+      const pAzul = room.jokenpo.azul;
+      const pAma = room.jokenpo.amarelo;
+
+      let winnerTeam = null;
+
+      if (pAzul === pAma) {
+        io.to(roomId).emit('log_message', `⚖️ <strong>EMPATE!</strong> Ambas as equipes escolheram ${pAzul.toUpperCase()}. Jogando novamente...`);
+        room.jokenpo = { azul: null, amarelo: null };
         io.to(roomId).emit('jokenpo_draw');
-      } else {
-        let winner = p1;
-        if ((c1 === 'pedra' && c2 === 'papel') || (c1 === 'papel' && c2 === 'tesoura') || (c1 === 'tesoura' && c2 === 'pedra')) {
-          winner = p2;
-        }
-        room.jokenpoWinner = winner;
-        io.to(roomId).emit('jokenpo_result', { winnerTeam: winner.team, winnerName: winner.name });
+        return;
       }
+
+      if (
+        (pAzul === 'pedra' && pAma === 'tesoura') ||
+        (pAzul === 'tesoura' && pAma === 'papel') ||
+        (pAzul === 'papel' && pAma === 'pedra')
+      ) {
+        winnerTeam = 'azul';
+      } else {
+        winnerTeam = 'amarelo';
+      }
+
+      room.status = 'choice';
+      const winnerPlayer = room.players.find(p => p.team === winnerTeam && p.role === 'observador');
+
+      io.to(roomId).emit('jokenpo_result', {
+        winnerTeam,
+        winnerName: winnerPlayer ? winnerPlayer.name : `Time ${winnerTeam.toUpperCase()}`,
+        choices: room.jokenpo
+      });
     }
   });
 
+  // Decisão do vencedor do Pedra, Papel ou Tesoura
   socket.on('choose_starter_team', ({ roomId, starterTeam }) => {
     const room = rooms[roomId];
-    if (!room) return;
-    room.currentTurn = starterTeam;
+    if (!room || room.status !== 'choice') return;
+
     room.status = 'playing';
+    room.currentTurn = starterTeam;
+    room.cards = createNewGame(starterTeam);
+
     io.to(roomId).emit('game_ready', { room });
-    io.to(roomId).emit('log_message', `⚔️ O time <strong>${starterTeam.toUpperCase()}</strong> começa jogando com vantagem!`);
+    io.to(roomId).emit('log_message', `🎲 A equipe <strong>${starterTeam.toUpperCase()}</strong> vai começar o jogo com a vantagem de 8 cartas!`);
   });
 
   socket.on('send_clue', ({ roomId, playerName, team, word, number }) => {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room || room.status !== 'playing') return;
 
-    room.activeClue = { word, number: parseInt(number) };
-    room.clicksRemaining = parseInt(number) + 1;
+    if (room.gameMode === 'confronto' && room.currentTurn !== team) {
+      socket.emit('error_message', 'Não é o turno do seu time!');
+      return;
+    }
+
+    const numClicks = parseInt(number, 10);
+    room.activeClue = { word: word.toUpperCase(), number: numClicks, author: playerName };
+    room.clicksRemaining = numClicks;
 
     io.to(roomId).emit('clue_updated', { clue: room.activeClue, clicksRemaining: room.clicksRemaining });
-    io.to(roomId).emit('log_message', `💡 <strong>${playerName}</strong> enviou a dica: <strong>"${word}"</strong> (${number})`);
+    io.to(roomId).emit('log_message', `📢 <strong>${playerName}</strong> enviou a dica: <strong>"${word.toUpperCase()}"</strong> para <strong>${number}</strong> carta(s).`);
   });
 
   socket.on('click_card', ({ roomId, cardId, playerName, team }) => {
     const room = rooms[roomId];
     if (!room || room.status !== 'playing') return;
 
-    const card = room.cards.find(c => c.id === cardId);
-    if (!card || card.revealed) return;
+    if (room.gameMode === 'confronto' && room.currentTurn !== team) {
+      socket.emit('error_message', 'Não é o turno do seu time!');
+      return;
+    }
+
+    if (!room.activeClue || room.clicksRemaining <= 0) {
+      socket.emit('error_message', 'Aguarde a dica antes de clicar!');
+      return;
+    }
+
+    const card = room.cards[cardId];
+    if (card.revealed) return;
 
     card.revealed = true;
+    room.clicksRemaining -= 1;
+
     io.to(roomId).emit('card_revealed', { cardId: card.id, type: card.type, clicksRemaining: room.clicksRemaining });
-    io.to(roomId).emit('log_message', `🔍 <strong>${playerName}</strong> revelou a carta <strong>${card.nome}</strong> (${card.type.toUpperCase()})`);
 
     if (room.gameMode === 'dupla') {
       if (card.type === 'azul') {
-        room.clicksRemaining--;
-        const azulRestantes = room.cards.filter(c => c.type === 'azul' && !c.revealed).length;
-        if (azulRestantes === 0) {
-          room.status = 'game_over';
+        io.to(roomId).emit('log_message', `🎯 <strong>${playerName}</strong> acertou uma carta dos AGENTES!`);
+        if (room.cards.filter(c => c.type === 'azul' && !c.revealed).length === 0) {
           io.to(roomId).emit('game_over', { winner: 'jogadores' });
-        } else if (room.clicksRemaining <= 0) {
-          room.activeClue = null;
-          io.to(roomId).emit('turn_changed', { currentTurn: 'azul' });
+          return;
         }
       } else if (card.type === 'amarelo') {
+        io.to(roomId).emit('log_message', `⚠️ <strong>${playerName}</strong> revelou carta do SISTEMA! Rodada encerrada.`);
+        if (room.cards.filter(c => c.type === 'amarelo' && !c.revealed).length === 0) {
+          io.to(roomId).emit('game_over', { winner: 'sistema' });
+          return;
+        }
         room.activeClue = null;
         room.clicksRemaining = 0;
-        io.to(roomId).emit('turn_changed', { currentTurn: 'azul' });
+        io.to(roomId).emit('turn_changed', { currentTurn: 'jogadores' });
+        return;
+      } else if (card.type === 'branca') {
+        io.to(roomId).emit('log_message', `⚪ <strong>${playerName}</strong> escolheu uma carta NEUTRA.`);
+        room.activeClue = null;
+        room.clicksRemaining = 0;
+        io.to(roomId).emit('turn_changed', { currentTurn: 'jogadores' });
+        return;
       } else if (card.type === 'preta') {
-        room.status = 'game_over';
+        io.to(roomId).emit('log_message', `💥 <strong>${playerName}</strong> acertou a BOMBA!`);
         io.to(roomId).emit('game_over', { winner: 'sistema' });
-      } else {
+        return;
+      }
+
+      if (room.clicksRemaining === 0) {
         room.activeClue = null;
-        room.clicksRemaining = 0;
-        io.to(roomId).emit('turn_changed', { currentTurn: 'azul' });
+        io.to(roomId).emit('turn_changed', { currentTurn: 'jogadores' });
       }
     } else {
-      const isMyTeamCard = (card.type === room.currentTurn);
-      if (isMyTeamCard) {
-        room.clicksRemaining--;
-        const teamRestantes = room.cards.filter(c => c.type === room.currentTurn && !c.revealed).length;
-        if (teamRestantes === 0) {
-          room.status = 'game_over';
-          io.to(roomId).emit('game_over', { winner: room.currentTurn });
-        } else if (room.clicksRemaining <= 0) {
-          room.currentTurn = room.currentTurn === 'azul' ? 'amarelo' : 'azul';
-          room.activeClue = null;
-          io.to(roomId).emit('turn_changed', { currentTurn: room.currentTurn });
-        }
-      } else {
-        if (card.type === 'preta') {
-          const winner = room.currentTurn === 'azul' ? 'amarelo' : 'azul';
-          room.status = 'game_over';
-          io.to(roomId).emit('game_over', { winner });
-        } else {
-          room.currentTurn = room.currentTurn === 'azul' ? 'amarelo' : 'azul';
-          room.activeClue = null;
-          io.to(roomId).emit('turn_changed', { currentTurn: room.currentTurn });
-        }
+      io.to(roomId).emit('log_message', `👉 <strong>${playerName}</strong> (${team.toUpperCase()}) revelou: <strong>${card.type.toUpperCase()}</strong>.`);
+
+      if (card.type === 'preta') {
+        const winner = team === 'azul' ? 'amarelo' : 'azul';
+        io.to(roomId).emit('game_over', { winner });
+        return;
+      }
+
+      const blueLeft = room.cards.filter(c => c.type === 'azul' && !c.revealed).length;
+      const yellowLeft = room.cards.filter(c => c.type === 'amarelo' && !c.revealed).length;
+
+      if (blueLeft === 0) { io.to(roomId).emit('game_over', { winner: 'azul' }); return; }
+      if (yellowLeft === 0) { io.to(roomId).emit('game_over', { winner: 'amarelo' }); return; }
+
+      let endTurn = (card.type !== team || room.clicksRemaining === 0);
+
+      if (endTurn) {
+        room.currentTurn = room.currentTurn === 'azul' ? 'amarelo' : 'azul';
+        room.activeClue = null;
+        room.clicksRemaining = 0;
+        io.to(roomId).emit('turn_changed', { currentTurn: room.currentTurn });
       }
     }
   });
@@ -270,46 +324,53 @@ io.on('connection', (socket) => {
   socket.on('restart_game', ({ roomId }) => {
     const room = rooms[roomId];
     if (!room) return;
-    room.cards = gerarTabuleiro(room.gameMode);
-    room.status = 'playing';
-    room.activeClue = null;
-    room.clicksRemaining = 0;
-    io.to(roomId).emit('game_ready', { room });
-    io.to(roomId).emit('log_message', `🔄 Partida reiniciada na sala <strong>${roomId}</strong>!`);
+
+    if (room.gameMode === 'dupla') {
+      room.status = 'playing';
+      room.currentTurn = 'jogadores';
+      room.cards = createNewGame('azul');
+      io.to(roomId).emit('game_ready', { room });
+    } else {
+      room.status = 'jokenpo';
+      room.jokenpo = { azul: null, amarelo: null };
+      io.to(roomId).emit('start_jokenpo_phase', { room });
+    }
   });
 
   socket.on('leave_room', ({ roomId }) => {
-    removerJogadorDaSala(socket, roomId);
+    socket.leave(roomId);
+    const room = rooms[roomId];
+    if (room) {
+      room.players = room.players.filter(p => p.id !== socket.id);
+      if (room.players.length === 0) {
+        delete rooms[roomId];
+      } else {
+        room.status = 'waiting';
+        io.to(roomId).emit('update_players', room.players);
+        io.to(roomId).emit('room_waiting_state', { room });
+      }
+      broadcastRoomsList();
+    }
   });
 
   socket.on('disconnect', () => {
-    if (socket.roomId && socket.playerName) {
-      disconnectTimers[socket.id] = setTimeout(() => {
-        removerJogadorDaSala(socket, socket.roomId);
-      }, 5000);
+    for (const rId in rooms) {
+      const room = rooms[rId];
+      const idx = room.players.findIndex(p => p.id === socket.id);
+      if (idx !== -1) {
+        room.players.splice(idx, 1);
+        if (room.players.length === 0) {
+          delete rooms[rId];
+        } else {
+          room.status = 'waiting';
+          io.to(rId).emit('update_players', room.players);
+          io.to(rId).emit('room_waiting_state', { room });
+        }
+      }
     }
+    broadcastRoomsList();
   });
 });
 
-function removerJogadorDaSala(socket, roomId) {
-  const room = rooms[roomId];
-  if (!room) return;
-
-  room.players = room.players.filter(p => p.id !== socket.id);
-  socket.leave(roomId);
-
-  if (room.players.length === 0) {
-    delete rooms[roomId];
-  } else {
-    room.status = 'waiting';
-    io.to(roomId).emit('update_players', room.players);
-    io.to(roomId).emit('room_waiting_state', { room });
-    io.to(roomId).emit('log_message', `🚪 Um agente saiu da sala.`);
-  }
-  broadcastPublicRooms();
-}
-
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`🚀 Servidor Código 20 rodando em http://localhost:${PORT}`));
