@@ -96,27 +96,7 @@
     /* ARENA DE JOGO RESPONSIVA */
     .game-layout { display: grid; grid-template-columns: 140px 1fr 140px; gap: 10px; width: 100%; align-items: start; }
     @media (max-width: 1024px) { 
-      .game-layout { 
-        grid-template-columns: 1fr; 
-        gap: 8px; 
-      }
-      /* No celular, os painéis de equipe vão para o topo lado a lado ou compactos */
-      .teams-mobile-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        width: 100%;
-        order: 1;
-      }
-      .center-board {
-        order: 2;
-      }
-      .team-panel.blue-side {
-        order: 1;
-      }
-      .team-panel.yellow-side {
-        order: 2;
-      }
+      .game-layout { grid-template-columns: 1fr; gap: 8px; }
     }
 
     .teams-top-wrapper { display: contents; }
@@ -177,9 +157,7 @@
 
     /* TABULEIRO DE CARTAS RESPONSIVO */
     .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin-bottom: 8px; }
-    @media (max-width: 600px) {
-      .grid { gap: 5px; }
-    }
+    @media (max-width: 600px) { .grid { gap: 5px; } }
     .card { background-color: var(--card-cream); background-image: radial-gradient(#e5decf 1px, transparent 0); background-size: 6px 6px; aspect-ratio: 1 / 1; border-radius: 8px; cursor: pointer; position: relative; overflow: hidden; border: 2px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.6); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding: 4px; }
     .card:hover { transform: translateY(-2px) scale(1.02); border-color: var(--gold-glow); box-shadow: 0 8px 15px rgba(245, 158, 11, 0.3); }
     .card img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform 0.2s ease; }
@@ -259,6 +237,7 @@
           <input type="text" id="room-id" value="sala1" oninput="checkRoomStatus()">
         </div>
 
+        <!-- SELETOR DE MODO DE JOGO RESTAURADO -->
         <div class="form-group">
           <label>MODO DE JOGO</label>
           <div class="mode-btn-grid">
@@ -350,7 +329,6 @@
 
     <div class="game-layout hidden" id="main-game-layout">
       
-      <!-- Wrapper para celulares para colocar os dois painéis lado a lado no topo -->
       <div class="teams-top-wrapper">
         <div class="team-panel blue-side">
           <div class="team-header blue" id="left-team-header">EQUIPE DUPLA</div>
