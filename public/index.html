@@ -32,175 +32,161 @@
         linear-gradient(rgba(15, 11, 8, 0.94), rgba(15, 11, 8, 0.97)),
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, rgba(255, 255, 255, 0.02) 3px),
         radial-gradient(circle, #2a1b12 0%, #0a0705 100%);
-      color: #f5f5f4; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 8px 10px;
+      color: #f5f5f4; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px 16px;
     }
 
     .screen { width: 100%; max-width: 1350px; display: flex; flex-direction: column; align-items: center; }
     .hidden { display: none !important; }
 
     /* LOGO DO JOGO */
-    .logo-container { text-align: center; margin-bottom: 10px; display: flex; flex-direction: column; align-items: center; }
-    .logo-image-box { width: 100%; max-width: 120px; margin-bottom: 2px; display: flex; justify-content: center; align-items: center; }
-    .logo-image-box img { width: 100%; height: auto; max-height: 70px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4)); }
-    .logo-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 2px 2px 4px rgba(0,0,0,0.9); }
-    .logo-subtitle { font-family: 'Special Elite', monospace; color: #d6d3d1; font-size: 0.7rem; letter-spacing: 1.5px; }
+    .logo-container { text-align: center; margin-bottom: 16px; display: flex; flex-direction: column; align-items: center; }
+    .logo-image-box { width: 100%; max-width: 150px; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; }
+    .logo-image-box img { width: 100%; height: auto; max-height: 90px; object-fit: contain; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4)); }
+    .logo-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 2.3rem; font-weight: 900; letter-spacing: 3px; color: #fff; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 2px 2px 4px rgba(0,0,0,0.9); }
+    .logo-subtitle { font-family: 'Special Elite', monospace; color: #d6d3d1; font-size: 0.8rem; letter-spacing: 2px; }
 
     /* LOBBY DUAL */
-    .lobby-dual-container { display: grid; grid-template-columns: 1fr 340px; gap: 15px; width: 100%; max-width: 940px; }
-    @media (max-width: 768px) { .lobby-dual-container { grid-template-columns: 1fr; gap: 10px; } }
-    .lobby-card { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 14px; padding: 16px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); }
-    .public-rooms-panel { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .panel-title { font-family: 'Special Elite', monospace; font-size: 0.85rem; letter-spacing: 1px; color: var(--gold-glow); display: flex; align-items: center; justify-content: space-between; }
-    .rooms-list { display: flex; flex-direction: column; gap: 8px; max-height: 350px; overflow-y: auto; }
-    .room-item { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
+    .lobby-dual-container { display: grid; grid-template-columns: 1fr 340px; gap: 20px; width: 100%; max-width: 940px; }
+    @media (max-width: 768px) { .lobby-dual-container { grid-template-columns: 1fr; } }
+    .lobby-card { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 16px; padding: 22px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); }
+    .public-rooms-panel { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .panel-title { font-family: 'Special Elite', monospace; font-size: 0.9rem; letter-spacing: 1px; color: var(--gold-glow); display: flex; align-items: center; justify-content: space-between; }
+    .rooms-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; }
+    .room-item { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
     .room-item .room-info { display: flex; flex-direction: column; gap: 2px; }
-    .room-item .room-name { font-weight: 800; font-size: 0.82rem; color: #fff; }
-    .room-item .room-creator { font-size: 0.68rem; color: #d6d3d1; }
-    .room-item .room-badge { font-size: 0.62rem; color: #a8a29e; font-family: 'Special Elite', monospace; }
+    .room-item .room-name { font-weight: 800; font-size: 0.88rem; color: #fff; }
+    .room-item .room-creator { font-size: 0.7rem; color: #d6d3d1; }
+    .room-item .room-badge { font-size: 0.65rem; color: #a8a29e; font-family: 'Special Elite', monospace; }
 
-    button.btn-join-public { background: var(--gold-accent); color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 800; font-size: 0.7rem; cursor: pointer; text-transform: uppercase; }
+    button.btn-join-public { background: var(--gold-accent); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 0.72rem; cursor: pointer; text-transform: uppercase; }
     button.btn-join-public:hover { background: var(--gold-glow); }
 
-    .form-group { margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
-    label { font-family: 'Special Elite', monospace; font-size: 0.72rem; letter-spacing: 1px; color: #a8a29e; }
-    input[type="text"], input[type="password"], select { background: #120c09; border: 1px solid #3a281c; color: #fef3c7; padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; outline: none; width: 100%; }
+    .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+    label { font-family: 'Special Elite', monospace; font-size: 0.78rem; letter-spacing: 1px; color: #a8a29e; }
+    input[type="text"], input[type="password"], select { background: #120c09; border: 1px solid #3a281c; color: #fef3c7; padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; outline: none; }
 
-    .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 2px; }
-    .avatar-option { background: #120c09; border: 2px solid #3a281c; border-radius: 6px; padding: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; overflow: hidden; }
-    .avatar-option img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
-    .avatar-option.selected { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.2); box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+    .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 4px; }
+    .avatar-option { background: #120c09; border: 2px solid #3a281c; border-radius: 8px; padding: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; overflow: hidden; }
+    .avatar-option img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+    .avatar-option.selected { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.2); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
 
-    .mode-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .mode-btn { background: #120c09; border: 1px solid #3a281c; color: #a8a29e; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .mode-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mode-btn { background: #120c09; border: 1px solid #3a281c; color: #a8a29e; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; text-align: center; transition: all 0.2s; }
     .mode-btn:hover { border-color: var(--gold-glow); color: #fff; }
-    .mode-btn.active { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.25); color: #fff; box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+    .mode-btn.active { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.25); color: #fff; box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
     .mode-btn.active.blue { border-color: var(--blue-team); background: rgba(37, 99, 235, 0.25); color: #fff; }
     .mode-btn.active.yellow { border-color: var(--yellow-team); background: rgba(217, 119, 6, 0.25); color: #fff; }
     .mode-btn.active.role { border-color: #10b981; background: rgba(16, 185, 129, 0.2); color: #fff; }
     .mode-btn.disabled { opacity: 0.4; cursor: not-allowed; border-color: #261a12 !important; background: #0a0705 !important; color: #666 !important; }
 
-    button.primary { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); color: #fff; border: 1px solid rgba(251, 191, 36, 0.4); padding: 10px; font-size: 0.85rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); transition: all 0.2s; }
+    button.primary { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); color: #fff; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px; font-size: 0.9rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3); transition: all 0.2s; }
     button.primary:hover { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); transform: translateY(-2px); }
     button.primary:disabled { background: #332218; border-color: #443228; color: #776655; cursor: not-allowed; box-shadow: none; transform: none; }
 
-    .action-bar { display: flex; gap: 8px; margin-bottom: 6px; width: 100%; justify-content: center; }
-    button.share-btn { background: rgba(217, 119, 6, 0.2); border: 1px solid var(--gold-accent); color: #fef3c7; padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    .action-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+    button.share-btn { background: rgba(217, 119, 6, 0.2); border: 1px solid var(--gold-accent); color: #fef3c7; padding: 6px 14px; font-size: 0.78rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
     button.share-btn:hover { background: var(--gold-accent); color: #fff; }
-    button.leave-btn { background: rgba(220, 38, 38, 0.2); border: 1px solid var(--danger-red); color: #fca5a5; padding: 5px 12px; font-size: 0.72rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    button.leave-btn { background: rgba(220, 38, 38, 0.2); border: 1px solid var(--danger-red); color: #fca5a5; padding: 6px 14px; font-size: 0.78rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
     button.leave-btn:hover { background: var(--danger-red); color: #fff; }
-    button.rules-btn { background: transparent; border: 1px dashed var(--gold-glow); color: var(--gold-glow); padding: 7px; border-radius: 8px; font-weight: 800; font-size: 0.72rem; cursor: pointer; width: 100%; margin-top: 6px; }
+    button.rules-btn { background: transparent; border: 1px dashed var(--gold-glow); color: var(--gold-glow); padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; width: 100%; margin-top: 8px; }
     button.rules-btn:hover { background: rgba(245, 158, 11, 0.15); }
-    button.secondary { background: #2a1b12; color: #d6d3d1; border: 1px solid #443228; padding: 10px; font-size: 0.82rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; }
+    button.secondary { background: #2a1b12; color: #d6d3d1; border: 1px solid #443228; padding: 12px; font-size: 0.88rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; }
     button.secondary:hover { background: #3f2a1d; color: #fff; }
 
-    /* ARENA DE JOGO RESPONSIVA */
-    .game-layout { display: grid; grid-template-columns: 140px 1fr 140px; gap: 10px; width: 100%; align-items: start; }
-    @media (max-width: 1024px) { 
-      .game-layout { grid-template-columns: 1fr; gap: 8px; }
-    }
+    /* ARENA DE JOGO */
+    .game-layout { display: grid; grid-template-columns: 140px 1fr 140px; gap: 14px; width: 100%; align-items: start; }
+    @media (max-width: 1024px) { .game-layout { grid-template-columns: 120px 1fr 120px; gap: 8px; } }
 
-    .teams-top-wrapper { display: contents; }
-    @media (max-width: 1024px) {
-      .teams-top-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        width: 100%;
-        margin-bottom: 6px;
-      }
-    }
-
-    .team-panel { background: rgba(20, 14, 10, 0.85); border: 1px solid #3a281c; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .team-panel { background: rgba(20, 14, 10, 0.85); border: 1px solid #3a281c; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .team-panel.blue-side { border-top: 3px solid var(--blue-team); }
     .team-panel.yellow-side { border-top: 3px solid var(--yellow-team); }
-    .team-header { font-family: 'Special Elite', monospace; font-size: 0.78rem; font-weight: 900; letter-spacing: 1px; text-align: center; }
+    .team-header { font-family: 'Special Elite', monospace; font-size: 0.88rem; font-weight: 900; letter-spacing: 1px; }
     .team-header.blue { color: #60a5fa; }
     .team-header.yellow { color: #fbbf24; }
 
-    .players-flex-box { width: 100%; display: flex; flex-direction: column; gap: 5px; }
-    @media (max-width: 1024px) {
-      .players-flex-box { flex-direction: row; justify-content: center; flex-wrap: wrap; }
-    }
+    .player-card { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 6px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; }
+    .player-card.active-turn { border-color: var(--gold-glow); box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); transform: scale(1.03); background: linear-gradient(180deg, #24160c 0%, #120c09 100%); }
+    .turn-badge-player { position: absolute; top: -7px; background: var(--gold-glow); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; letter-spacing: 1px; animation: pulseBadge 1.5s infinite; }
+    @keyframes pulseBadge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-    .player-card { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 5px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; }
-    @media (max-width: 1024px) { .player-card { width: calc(50% - 3px); min-width: 90px; } }
-    .player-card.active-turn { border-color: var(--gold-glow); box-shadow: 0 0 10px rgba(245, 158, 11, 0.6); transform: scale(1.02); background: linear-gradient(180deg, #24160c 0%, #120c09 100%); }
-    .turn-badge-player { position: absolute; top: -6px; background: var(--gold-glow); color: #000; font-size: 0.5rem; font-weight: 900; padding: 1px 4px; border-radius: 4px; letter-spacing: 0.5px; animation: pulseBadge 1.5s infinite; }
-    @keyframes pulseBadge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-
-    .player-card .avatar-box { width: 36px; height: 36px; border-radius: 50%; background: #2a1b12; display: flex; align-items: center; justify-content: center; margin-bottom: 3px; border: 2px solid var(--gold-accent); overflow: hidden; }
+    .player-card .avatar-box { width: 44px; height: 44px; border-radius: 50%; background: #2a1b12; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid var(--gold-accent); overflow: hidden; }
     .player-card .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-    .player-card .name { font-weight: 800; font-size: 0.7rem; color: #fff; overflow: hidden; text-overflow: ellipsis; max-width: 100%; white-space: nowrap; }
-    .player-card .role-badge { font-size: 0.52rem; color: #a8a29e; font-family: 'Special Elite', monospace; text-transform: uppercase; margin-top: 1px; }
+    .player-card .name { font-weight: 800; font-size: 0.75rem; color: #fff; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .player-card .role-badge { font-size: 0.58rem; color: #a8a29e; font-family: 'Special Elite', monospace; text-transform: uppercase; margin-top: 1px; }
 
     /* MESA CENTRAL */
     .center-board { display: flex; flex-direction: column; align-items: center; width: 100%; }
-    header { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
-    .scoreboard { display: flex; gap: 8px; margin-top: 3px; }
-    .score-card { background: rgba(0,0,0,0.6); border: 1px solid #443228; padding: 3px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.75rem; }
-    .score-number { font-size: 1rem; font-weight: 900; }
+    header { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+    .scoreboard { display: flex; gap: 12px; margin-top: 4px; }
+    .score-card { background: rgba(0,0,0,0.6); border: 1px solid #443228; padding: 4px 14px; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.82rem; }
+    .score-number { font-size: 1.15rem; font-weight: 900; }
     .score-blue .score-number { color: #60a5fa; }
     .score-yellow .score-number { color: #fbbf24; }
 
-    .turn-badge { padding: 3px 12px; border-radius: 15px; font-weight: 900; font-size: 0.7rem; letter-spacing: 0.8px; text-transform: uppercase; text-align: center; }
+    .turn-badge { padding: 4px 16px; border-radius: 20px; font-weight: 900; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
     .turn-blue { background: var(--blue-team); color: #fff; }
     .turn-yellow { background: var(--yellow-team); color: #fff; }
 
-    .clue-banner { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; width: 100%; padding: 6px 10px; border-radius: 8px; text-align: center; margin-bottom: 6px; font-size: 0.8rem; }
-    .clue-word-highlight { color: #f59e0b; font-weight: 900; text-transform: uppercase; font-size: 0.95rem; }
+    .clue-banner { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; width: 100%; padding: 8px 12px; border-radius: 8px; text-align: center; margin-bottom: 8px; font-size: 0.88rem; }
+    .clue-word-highlight { color: #f59e0b; font-weight: 900; text-transform: uppercase; font-size: 1.05rem; }
 
-    .observer-panel-wrapper { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
-    .clue-tip-box { background: rgba(217, 119, 6, 0.15); border: 1px dashed var(--gold-glow); color: #fef3c7; font-size: 0.72rem; padding: 5px 8px; border-radius: 6px; text-align: center; }
-    .observer-panel { background: rgba(20, 14, 10, 0.9); border: 1px solid var(--gold-accent); border-radius: 8px; padding: 6px 10px; width: 100%; display: flex; gap: 6px; align-items: center; }
-    .observer-panel input { flex: 1; padding: 6px 8px; font-size: 0.82rem; }
-    .observer-panel select { padding: 6px; font-size: 0.82rem; }
+    .observer-panel-wrapper { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .clue-tip-box { background: rgba(217, 119, 6, 0.15); border: 1px dashed var(--gold-glow); color: #fef3c7; font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; text-align: center; }
+    .observer-panel { background: rgba(20, 14, 10, 0.9); border: 1px solid var(--gold-accent); border-radius: 8px; padding: 8px 12px; width: 100%; display: flex; gap: 8px; align-items: center; }
+    .observer-panel input { flex: 1; padding: 8px 10px; font-size: 0.88rem; }
+    .observer-panel select { padding: 8px; font-size: 0.88rem; }
 
-    /* TABULEIRO DE CARTAS RESPONSIVO */
-    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; margin-bottom: 8px; }
-    @media (max-width: 600px) { .grid { gap: 5px; } }
-    .card { background-color: var(--card-cream); background-image: radial-gradient(#e5decf 1px, transparent 0); background-size: 6px 6px; aspect-ratio: 1 / 1; border-radius: 8px; cursor: pointer; position: relative; overflow: hidden; border: 2px solid var(--card-border); box-shadow: 0 4px 10px rgba(0,0,0,0.6); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding: 4px; }
-    .card:hover { transform: translateY(-2px) scale(1.02); border-color: var(--gold-glow); box-shadow: 0 8px 15px rgba(245, 158, 11, 0.3); }
+    /* TABULEIRO */
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; margin-bottom: 10px; }
+    .card { background-color: var(--card-cream); background-image: radial-gradient(#e5decf 1px, transparent 0); background-size: 8px 8px; aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer; position: relative; overflow: hidden; border: 3px solid var(--card-border); box-shadow: 0 8px 16px rgba(0,0,0,0.7); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .card:hover { transform: translateY(-4px) scale(1.04); border-color: var(--gold-glow); box-shadow: 0 12px 20px rgba(245, 158, 11, 0.3); }
     .card img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform 0.2s ease; }
-    .card:hover img { transform: scale(1.04); }
+    .card:hover img { transform: scale(1.06); }
 
-    .card.revealed-azul::after { content: "AZUL"; position: absolute; inset:0; background: var(--blue-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 0.75rem; }
-    .card.revealed-amarelo::after { content: "AMARELO"; position: absolute; inset:0; background: var(--yellow-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 0.75rem; }
-    .card.revealed-branca::after { content: "NEUTRA"; position: absolute; inset:0; background: var(--neutral-overlay); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size: 0.7rem; }
-    .card.revealed-preta::after { content: "BOMBA 💥"; position: absolute; inset:0; background: rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--danger-red); font-size: 0.85rem; }
+    .card.revealed-azul::after { content: "AZUL"; position: absolute; inset:0; background: var(--blue-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 1rem; }
+    .card.revealed-amarelo::after { content: "AMARELO"; position: absolute; inset:0; background: var(--yellow-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 1rem; }
+    .card.revealed-branca::after { content: "NEUTRA"; position: absolute; inset:0; background: var(--neutral-overlay); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size: 0.9rem; }
+    .card.revealed-preta::after { content: "BOMBA 💥"; position: absolute; inset:0; background: rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--danger-red); font-size: 1.1rem; }
 
-    .is-observer .card.type-azul { border: 2px solid var(--blue-team); box-shadow: 0 0 8px rgba(37, 99, 235, 0.4); }
-    .is-observer .card.type-amarelo { border: 2px solid var(--yellow-team); box-shadow: 0 0 8px rgba(217, 119, 6, 0.4); }
-    .is-observer .card.type-branca { border: 2px solid var(--neutral-card); }
-    .is-observer .card.type-preta { border: 2px solid #ef4444; background: #27272a; }
+    .is-observer .card.type-azul { border: 3px solid var(--blue-team); box-shadow: 0 0 10px rgba(37, 99, 235, 0.4); }
+    .is-observer .card.type-amarelo { border: 3px solid var(--yellow-team); box-shadow: 0 0 10px rgba(217, 119, 6, 0.4); }
+    .is-observer .card.type-branca { border: 3px solid var(--neutral-card); }
+    .is-observer .card.type-preta { border: 3px solid #ef4444; background: #27272a; }
 
-    .history-log { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; border-radius: 8px; padding: 6px 10px; width: 100%; max-height: 65px; overflow-y: auto; font-size: 0.72rem; color: #a8a29e; }
-    .log-item { margin-bottom: 2px; }
+    .history-log { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; border-radius: 8px; padding: 8px 12px; width: 100%; max-height: 80px; overflow-y: auto; font-size: 0.78rem; color: #a8a29e; }
+    .log-item { margin-bottom: 3px; }
 
     /* ESTILOS PEDRA, PAPEL OU TESOURA E PAINEL DE ESPERA */
     .waiting-banner {
       background: rgba(217, 119, 6, 0.2); border: 2px dashed var(--gold-glow);
-      padding: 16px; border-radius: 12px; text-align: center; margin: 15px 0; width: 100%;
+      padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; width: 100%;
     }
-    .waiting-banner h2 { color: var(--gold-glow); font-size: 1.1rem; margin-bottom: 6px; }
+    .waiting-banner h2 { color: var(--gold-glow); font-size: 1.3rem; margin-bottom: 8px; }
 
-    .jokenpo-box { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+    .jokenpo-box { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
     .jokenpo-btn {
       background: #120c09; border: 2px solid var(--gold-accent); color: #fff;
-      padding: 10px 16px; border-radius: 8px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+      padding: 12px 20px; border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
     }
-    .jokenpo-btn:hover { background: var(--gold-accent); transform: scale(1.05); }
+    .jokenpo-btn:hover { background: var(--gold-accent); transform: scale(1.08); }
 
     /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 999; animation: fadeIn 0.3s ease; padding: 10px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 999; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .modal-card { background: rgba(20, 14, 10, 0.95); border: 2px solid var(--gold-accent); border-radius: 16px; padding: 20px 16px; width: 95%; max-width: 420px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 10px; max-height: 85vh; overflow-y: auto; }
+    .modal-card { background: rgba(20, 14, 10, 0.95); border: 2px solid var(--gold-accent); border-radius: 20px; padding: 28px 20px; width: 90%; max-width: 460px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; max-height: 85vh; overflow-y: auto; }
     .modal-card.victory { border-color: var(--success-green); }
     .modal-card.defeat { border-color: var(--danger-red); }
-    .modal-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 1.4rem; font-weight: 900; }
-    .modal-card.victory .modal-title { color: #34d399; text-shadow: 0 0 12px rgba(52, 211, 153, 0.4); }
-    .modal-card.defeat .modal-title { color: #f87171; text-shadow: 0 0 12px rgba(248, 113, 113, 0.4); }
-    .modal-subtitle { color: #d6d3d1; font-size: 0.82rem; line-height: 1.4; text-align: left; }
-    .modal-buttons { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 6px; }
+    .modal-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 1.7rem; font-weight: 900; }
+    .modal-card.victory .modal-title { color: #34d399; text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+    .modal-card.defeat .modal-title { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.4); }
+    .modal-subtitle { color: #d6d3d1; font-size: 0.88rem; line-height: 1.5; text-align: left; }
+    .modal-buttons { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
+
+    /* AJUSTE LEVE PARA CELULAR NÃO QUEBRAR O LAYOUT */
+    @media (max-width: 600px) {
+      .grid { gap: 6px; }
+      .card { padding: 4px; }
+    }
   </style>
 </head>
 <body>
@@ -237,7 +223,6 @@
           <input type="text" id="room-id" value="sala1" oninput="checkRoomStatus()">
         </div>
 
-        <!-- SELETOR DE MODO DE JOGO RESTAURADO -->
         <div class="form-group">
           <label>MODO DE JOGO</label>
           <div class="mode-btn-grid">
@@ -282,10 +267,10 @@
       <div class="public-rooms-panel">
         <div class="panel-title">
           <span>SALAS DISPONÍVEIS</span>
-          <span style="font-size: 0.7rem; color: #a8a29e;">AO VIVO</span>
+          <span style="font-size: 0.75rem; color: #a8a29e;">AO VIVO</span>
         </div>
         <div class="rooms-list" id="public-rooms-list">
-          <div style="text-align: center; color: #776655; font-size: 0.8rem; margin-top: 20px;">
+          <div style="text-align: center; color: #776655; font-size: 0.85rem; margin-top: 20px;">
             Nenhuma sala ativa no momento.
           </div>
         </div>
@@ -320,7 +305,7 @@
     <!-- DECISÃO DO VENCEDOR -->
     <div id="starter-choice-panel" class="waiting-banner hidden">
       <h2 style="color: var(--success-green);">🎉 VOCÊ VENCEU NO PEDRA, PAPEL OU TESOURA!</h2>
-      <p style="margin-bottom: 10px; font-size: 0.85rem;">Escolha quem começa o jogo (a equipe que começar terá 8 cartas para encontrar):</p>
+      <p style="margin-bottom: 12px;">Escolha quem começa o jogo (a equipe que começar terá 8 cartas para encontrar):</p>
       <div class="jokenpo-box">
         <button class="primary" style="width: auto;" onclick="chooseStarterTeam(player.team)">SEU TIME COMEÇA (8 Cartas)</button>
         <button class="secondary" style="width: auto;" onclick="chooseStarterTeam(player.team === 'azul' ? 'amarelo' : 'azul')">PASSAR A VEZ (7 Cartas)</button>
@@ -328,17 +313,9 @@
     </div>
 
     <div class="game-layout hidden" id="main-game-layout">
-      
-      <div class="teams-top-wrapper">
-        <div class="team-panel blue-side">
-          <div class="team-header blue" id="left-team-header">EQUIPE DUPLA</div>
-          <div id="blue-players-list" class="players-flex-box"></div>
-        </div>
-
-        <div class="team-panel yellow-side">
-          <div class="team-header yellow" id="right-team-header">SISTEMA</div>
-          <div id="yellow-players-list" class="players-flex-box"></div>
-        </div>
+      <div class="team-panel blue-side">
+        <div class="team-header blue" id="left-team-header">EQUIPE DUPLA</div>
+        <div id="blue-players-list" style="width: 100%; display: flex; flex-direction: column; gap: 6px;"></div>
       </div>
 
       <div class="center-board">
@@ -354,7 +331,7 @@
 
         <div id="observer-panel-wrapper" class="observer-panel-wrapper hidden">
           <div class="clue-tip-box">
-            💡 <strong>Dica de Mestre:</strong> Tente usar uma palavra que conecte <strong>duas ou mais imagens</strong>!
+            💡 <strong>Dica de Mestre:</strong> Tente usar uma palavra que conecte <strong>duas ou mais imagens</strong> para acertar mais rápido!
           </div>
           <div class="observer-panel">
             <input type="text" id="clue-word" placeholder="Sua palavra-dica..." maxlength="20">
@@ -364,7 +341,7 @@
               <option value="3">3</option>
               <option value="4">4</option>
             </select>
-            <button class="primary" style="width: auto; padding: 6px 12px; font-size: 0.8rem;" onclick="sendClue()">Enviar</button>
+            <button class="primary" style="width: auto; padding: 8px 16px; font-size: 0.85rem;" onclick="sendClue()">Enviar Dica</button>
           </div>
         </div>
 
@@ -372,6 +349,10 @@
         <div class="history-log" id="history-log"></div>
       </div>
 
+      <div class="team-panel yellow-side">
+        <div class="team-header yellow" id="right-team-header">SISTEMA</div>
+        <div id="yellow-players-list" style="width: 100%; display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
     </div>
   </div>
 
@@ -562,7 +543,7 @@
     socket.on('public_rooms_list', (rooms) => {
       const listEl = document.getElementById('public-rooms-list');
       if (!rooms || rooms.length === 0) {
-        listEl.innerHTML = `<div style="text-align: center; color: #776655; font-size: 0.8rem; margin-top: 15px;">Nenhuma sala ativa no momento.</div>`;
+        listEl.innerHTML = `<div style="text-align: center; color: #776655; font-size: 0.85rem; margin-top: 20px;">Nenhuma sala ativa no momento.</div>`;
         return;
       }
 
@@ -574,7 +555,7 @@
         const modeLabel = r.gameMode === 'confronto' ? 'VS (4P)' : 'Co-op (2P)';
         item.innerHTML = `
           <div class="room-info">
-            <div class="room-name">${typeIcon} ${r.id} <span style="color:var(--gold-glow); font-size:0.7rem;">[${modeLabel}]</span></div>
+            <div class="room-name">${typeIcon} ${r.id} <span style="color:var(--gold-glow); font-size:0.75rem;">[${modeLabel}]</span></div>
             <div class="room-creator">Criador: ${r.creatorName}</div>
             <div class="room-badge">${r.playersCount}/${r.maxPlayers} Jogadores</div>
           </div>
@@ -997,7 +978,7 @@
     function updateClueBanner(clue, clicksRemaining) {
       const banner = document.getElementById('clue-banner');
       if (clue) {
-        banner.innerHTML = `Dica: <span class="clue-word-highlight">"${clue.word}"</span> (${clue.number}) | Restam: <strong>${clicksRemaining}</strong>`;
+        banner.innerHTML = `Dica Atual: <span class="clue-word-highlight">"${clue.word}"</span> para <strong>${clue.number}</strong> carta(s) | Tentativas restantes: <strong>${clicksRemaining}</strong>`;
       } else {
         banner.innerHTML = 'Aguardando dica do Observador...';
       }
