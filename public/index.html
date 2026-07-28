@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CÓDIGO 20 - Edição Ilustrações Abstratas</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Special+Elite&family=Montserrat:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --gold-accent: #d97706;
+      --gold-glow: #f59e0b;
+      --card-cream: #f4f0ea;
+      --card-border: #d3c9b8;
+      --blue-team: #2563eb;
+      --blue-overlay: rgba(37, 99, 235, 0.88);
+      --yellow-team: #d97706;
+      --yellow-overlay: rgba(217, 119, 6, 0.88);
+      --neutral-card: #78716c;
+      --neutral-overlay: rgba(120, 113, 108, 0.9);
+      --black-card: #1c1917;
+      --danger-red: #dc2626;
+      --success-green: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+
+    body {
+      background: 
+        radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.12) 0%, transparent 60%),
+        linear-gradient(rgba(15, 11, 8, 0.94), rgba(15, 11, 8, 0.97)),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.02) 3px, rgba(255, 255, 255, 0.02) 3px),
+        radial-gradient(circle, #2a1b12 0%, #0a0705 100%);
+      color: #f5f5f4; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px 16px;
+    }
+
+    .screen { width: 100%; max-width: 1350px; display: flex; flex-direction: column; align-items: center; }
+    .hidden { display: none !important; }
+
+    /* LOGO DO JOGO */
+    .logo-container { text-align: center; margin-bottom: 16px; display: flex; flex-direction: column; align-items: center; }
+    .logo-image-box { width: 100%; max-width: 150px; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; }
+    .logo-image-box img { width: 100%; height: auto; max-height: 90px; object-fit: contain; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.4)); }
+    .logo-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 2.3rem; font-weight: 900; letter-spacing: 3px; color: #fff; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 2px 2px 4px rgba(0,0,0,0.9); }
+    .logo-subtitle { font-family: 'Special Elite', monospace; color: #d6d3d1; font-size: 0.8rem; letter-spacing: 2px; }
+
+    /* LOBBY DUAL */
+    .lobby-dual-container { display: grid; grid-template-columns: 1fr 340px; gap: 20px; width: 100%; max-width: 940px; }
+    @media (max-width: 768px) { .lobby-dual-container { grid-template-columns: 1fr; } }
+    .lobby-card { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 16px; padding: 22px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9); }
+    .public-rooms-panel { background: rgba(20, 14, 10, 0.88); backdrop-filter: blur(8px); border: 1px solid rgba(217, 119, 6, 0.3); border-top: 3px solid var(--gold-accent); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .panel-title { font-family: 'Special Elite', monospace; font-size: 0.9rem; letter-spacing: 1px; color: var(--gold-glow); display: flex; align-items: center; justify-content: space-between; }
+    .rooms-list { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; }
+    .room-item { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .room-item .room-info { display: flex; flex-direction: column; gap: 2px; }
+    .room-item .room-name { font-weight: 800; font-size: 0.88rem; color: #fff; }
+    .room-item .room-creator { font-size: 0.7rem; color: #d6d3d1; }
+    .room-item .room-badge { font-size: 0.65rem; color: #a8a29e; font-family: 'Special Elite', monospace; }
+
+    button.btn-join-public { background: var(--gold-accent); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 800; font-size: 0.72rem; cursor: pointer; text-transform: uppercase; }
+    button.btn-join-public:hover { background: var(--gold-glow); }
+
+    .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+    label { font-family: 'Special Elite', monospace; font-size: 0.78rem; letter-spacing: 1px; color: #a8a29e; }
+    input[type="text"], input[type="password"], select { background: #120c09; border: 1px solid #3a281c; color: #fef3c7; padding: 10px 12px; border-radius: 8px; font-size: 0.88rem; outline: none; }
+
+    .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 4px; }
+    .avatar-option { background: #120c09; border: 2px solid #3a281c; border-radius: 8px; padding: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; overflow: hidden; }
+    .avatar-option img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+    .avatar-option.selected { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.2); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+
+    .mode-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mode-btn { background: #120c09; border: 1px solid #3a281c; color: #a8a29e; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .mode-btn:hover { border-color: var(--gold-glow); color: #fff; }
+    .mode-btn.active { border-color: var(--gold-glow); background: rgba(217, 119, 6, 0.25); color: #fff; box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+    .mode-btn.active.blue { border-color: var(--blue-team); background: rgba(37, 99, 235, 0.25); color: #fff; }
+    .mode-btn.active.yellow { border-color: var(--yellow-team); background: rgba(217, 119, 6, 0.25); color: #fff; }
+    .mode-btn.active.role { border-color: #10b981; background: rgba(16, 185, 129, 0.2); color: #fff; }
+    .mode-btn.disabled { opacity: 0.4; cursor: not-allowed; border-color: #261a12 !important; background: #0a0705 !important; color: #666 !important; }
+
+    button.primary { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); color: #fff; border: 1px solid rgba(251, 191, 36, 0.4); padding: 12px; font-size: 0.9rem; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3); transition: all 0.2s; }
+    button.primary:hover { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); transform: translateY(-2px); }
+    button.primary:disabled { background: #332218; border-color: #443228; color: #776655; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .action-bar { display: flex; gap: 10px; margin-bottom: 10px; }
+    button.share-btn { background: rgba(217, 119, 6, 0.2); border: 1px solid var(--gold-accent); color: #fef3c7; padding: 6px 14px; font-size: 0.78rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    button.share-btn:hover { background: var(--gold-accent); color: #fff; }
+    button.leave-btn { background: rgba(220, 38, 38, 0.2); border: 1px solid var(--danger-red); color: #fca5a5; padding: 6px 14px; font-size: 0.78rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    button.leave-btn:hover { background: var(--danger-red); color: #fff; }
+    button.rules-btn { background: transparent; border: 1px dashed var(--gold-glow); color: var(--gold-glow); padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; width: 100%; margin-top: 8px; }
+    button.rules-btn:hover { background: rgba(245, 158, 11, 0.15); }
+    button.secondary { background: #2a1b12; color: #d6d3d1; border: 1px solid #443228; padding: 12px; font-size: 0.88rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; }
+    button.secondary:hover { background: #3f2a1d; color: #fff; }
+
+    /* ARENA DE JOGO */
+    .game-layout { display: grid; grid-template-columns: 140px 1fr 140px; gap: 14px; width: 100%; align-items: start; }
+    @media (max-width: 1024px) { .game-layout { grid-template-columns: 120px 1fr 120px; gap: 8px; } }
+
+    .team-panel { background: rgba(20, 14, 10, 0.85); border: 1px solid #3a281c; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .team-panel.blue-side { border-top: 3px solid var(--blue-team); }
+    .team-panel.yellow-side { border-top: 3px solid var(--yellow-team); }
+    .team-header { font-family: 'Special Elite', monospace; font-size: 0.88rem; font-weight: 900; letter-spacing: 1px; }
+    .team-header.blue { color: #60a5fa; }
+    .team-header.yellow { color: #fbbf24; }
+
+    .player-card { background: #120c09; border: 1px solid #3a281c; border-radius: 8px; padding: 6px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; transition: all 0.3s ease; }
+    .player-card.active-turn { border-color: var(--gold-glow); box-shadow: 0 0 12px rgba(245, 158, 11, 0.6); transform: scale(1.03); background: linear-gradient(180deg, #24160c 0%, #120c09 100%); }
+    .turn-badge-player { position: absolute; top: -7px; background: var(--gold-glow); color: #000; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; letter-spacing: 1px; animation: pulseBadge 1.5s infinite; }
+    @keyframes pulseBadge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+    .player-card .avatar-box { width: 44px; height: 44px; border-radius: 50%; background: #2a1b12; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border: 2px solid var(--gold-accent); overflow: hidden; }
+    .player-card .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+    .player-card .name { font-weight: 800; font-size: 0.75rem; color: #fff; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .player-card .role-badge { font-size: 0.58rem; color: #a8a29e; font-family: 'Special Elite', monospace; text-transform: uppercase; margin-top: 1px; }
+
+    /* MESA CENTRAL */
+    .center-board { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    header { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+    .scoreboard { display: flex; gap: 12px; margin-top: 4px; }
+    .score-card { background: rgba(0,0,0,0.6); border: 1px solid #443228; padding: 4px 14px; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.82rem; }
+    .score-number { font-size: 1.15rem; font-weight: 900; }
+    .score-blue .score-number { color: #60a5fa; }
+    .score-yellow .score-number { color: #fbbf24; }
+
+    .turn-badge { padding: 4px 16px; border-radius: 20px; font-weight: 900; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
+    .turn-blue { background: var(--blue-team); color: #fff; }
+    .turn-yellow { background: var(--yellow-team); color: #fff; }
+
+    .clue-banner { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; width: 100%; padding: 8px 12px; border-radius: 8px; text-align: center; margin-bottom: 8px; font-size: 0.88rem; }
+    .clue-word-highlight { color: #f59e0b; font-weight: 900; text-transform: uppercase; font-size: 1.05rem; }
+
+    .observer-panel-wrapper { width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .clue-tip-box { background: rgba(217, 119, 6, 0.15); border: 1px dashed var(--gold-glow); color: #fef3c7; font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; text-align: center; }
+    .observer-panel { background: rgba(20, 14, 10, 0.9); border: 1px solid var(--gold-accent); border-radius: 8px; padding: 8px 12px; width: 100%; display: flex; gap: 8px; align-items: center; }
+    .observer-panel input { flex: 1; padding: 8px 10px; font-size: 0.88rem; }
+    .observer-panel select { padding: 8px; font-size: 0.88rem; }
+
+    /* TABULEIRO */
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; width: 100%; margin-bottom: 10px; }
+    .card { background-color: var(--card-cream); background-image: radial-gradient(#e5decf 1px, transparent 0); background-size: 8px 8px; aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer; position: relative; overflow: hidden; border: 3px solid var(--card-border); box-shadow: 0 8px 16px rgba(0,0,0,0.7); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .card:hover { transform: translateY(-4px) scale(1.04); border-color: var(--gold-glow); box-shadow: 0 12px 20px rgba(245, 158, 11, 0.3); }
+    .card img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; transition: transform 0.2s ease; }
+    .card:hover img { transform: scale(1.06); }
+
+    .card.revealed-azul::after { content: "AZUL"; position: absolute; inset:0; background: var(--blue-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 1rem; }
+    .card.revealed-amarelo::after { content: "AMARELO"; position: absolute; inset:0; background: var(--yellow-overlay); display:flex; align-items:center; justify-content:center; font-weight:900; color:#fff; font-size: 1rem; }
+    .card.revealed-branca::after { content: "NEUTRA"; position: absolute; inset:0; background: var(--neutral-overlay); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size: 0.9rem; }
+    .card.revealed-preta::after { content: "BOMBA 💥"; position: absolute; inset:0; background: rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--danger-red); font-size: 1.1rem; }
+
+    .is-observer .card.type-azul { border: 3px solid var(--blue-team); box-shadow: 0 0 10px rgba(37, 99, 235, 0.4); }
+    .is-observer .card.type-amarelo { border: 3px solid var(--yellow-team); box-shadow: 0 0 10px rgba(217, 119, 6, 0.4); }
+    .is-observer .card.type-branca { border: 3px solid var(--neutral-card); }
+    .is-observer .card.type-preta { border: 3px solid #ef4444; background: #27272a; }
+
+    .history-log { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; border-radius: 8px; padding: 8px 12px; width: 100%; max-height: 80px; overflow-y: auto; font-size: 0.78rem; color: #a8a29e; }
+    .log-item { margin-bottom: 3px; }
+
+    /* ESTILOS PEDRA, PAPEL OU TESOURA E PAINEL DE ESPERA */
+    .waiting-banner {
+      background: rgba(217, 119, 6, 0.2); border: 2px dashed var(--gold-glow);
+      padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; width: 100%;
+    }
+    .waiting-banner h2 { color: var(--gold-glow); font-size: 1.3rem; margin-bottom: 8px; }
+
+    .jokenpo-box { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+    .jokenpo-btn {
+      background: #120c09; border: 2px solid var(--gold-accent); color: #fff;
+      padding: 12px 20px; border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: all 0.2s;
+    }
+    .jokenpo-btn:hover { background: var(--gold-accent); transform: scale(1.08); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 999; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-card { background: rgba(20, 14, 10, 0.95); border: 2px solid var(--gold-accent); border-radius: 20px; padding: 28px 20px; width: 90%; max-width: 460px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; max-height: 85vh; overflow-y: auto; }
+    .modal-card.victory { border-color: var(--success-green); }
+    .modal-card.defeat { border-color: var(--danger-red); }
+    .modal-title { font-family: 'Cinzel Decorative', cursive, serif; font-size: 1.7rem; font-weight: 900; }
+    .modal-card.victory .modal-title { color: #34d399; text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+    .modal-card.defeat .modal-title { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.4); }
+    .modal-subtitle { color: #d6d3d1; font-size: 0.88rem; line-height: 1.5; text-align: left; }
+    .modal-buttons { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DO LOBBY -->
+  <div id="lobby-screen" class="screen">
+    <div class="logo-container">
+      <div class="logo-image-box"><img src="logo.png" alt="Logo" onerror="tryNextImg(this, 'logo')"></div>
+      <div class="logo-title">CÓDIGO 20</div>
+      <div class="logo-subtitle">Edição Ilustrações Abstratas</div>
+    </div>
+
+    <div class="lobby-dual-container">
+      <div class="lobby-card">
+        <div class="form-group">
+          <label for="player-name">SEU APELIDO DE AGENTE</label>
+          <input type="text" id="player-name" value="Agente 01">
+        </div>
+
+        <div class="form-group">
+          <label>ESCOLHA SEU AGENTE</label>
+          <div class="avatar-grid" id="avatar-selector">
+            <div class="avatar-option selected" onclick="selectAvatar(1)" id="av-1"><img src="avatares/avatar_1.png" alt="1" onerror="tryNextImg(this, 'avatares/avatar_1')"></div>
+            <div class="avatar-option" onclick="selectAvatar(2)" id="av-2"><img src="avatares/avatar_2.png" alt="2" onerror="tryNextImg(this, 'avatares/avatar_2')"></div>
+            <div class="avatar-option" onclick="selectAvatar(3)" id="av-3"><img src="avatares/avatar_3.png" alt="3" onerror="tryNextImg(this, 'avatares/avatar_3')"></div>
+            <div class="avatar-option" onclick="selectAvatar(4)" id="av-4"><img src="avatares/avatar_4.png" alt="4" onerror="tryNextImg(this, 'avatares/avatar_4')"></div>
+            <div class="avatar-option" onclick="selectAvatar(5)" id="av-5"><img src="avatares/avatar_5.png" alt="5" onerror="tryNextImg(this, 'avatares/avatar_5')"></div>
+            <div class="avatar-option" onclick="selectAvatar(6)" id="av-6"><img src="avatares/avatar_6.png" alt="6" onerror="tryNextImg(this, 'avatares/avatar_6')"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="room-id">NOME / CÓDIGO DA SALA</label>
+          <input type="text" id="room-id" value="sala1" oninput="checkRoomStatus()">
+        </div>
+
+        <div class="form-group">
+          <label>MODO DE JOGO</label>
+          <div class="mode-btn-grid">
+            <div class="mode-btn active" id="btn-mode-dupla" onclick="selectGameMode('dupla')">🤝 CO-OP (2P)</div>
+            <div class="mode-btn" id="btn-mode-confronto" onclick="selectGameMode('confronto')">⚔️ VS (4P)</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>PRIVACIDADE DA SALA</label>
+          <div class="mode-btn-grid">
+            <div class="mode-btn active" id="btn-type-publica" onclick="selectPrivacy('publica')">🌐 ABERTA</div>
+            <div class="mode-btn" id="btn-type-privada" onclick="selectPrivacy('privada')">🔒 FECHADA</div>
+          </div>
+        </div>
+
+        <div class="form-group hidden" id="password-group">
+          <label for="room-password">SENHA DA SALA</label>
+          <input type="password" id="room-password" placeholder="Digite a senha...">
+        </div>
+
+        <div class="form-group hidden" id="team-group">
+          <label>SUA EQUIPE</label>
+          <div class="mode-btn-grid">
+            <div class="mode-btn active blue" id="btn-team-azul" onclick="selectTeam('azul')">TIME AZUL</div>
+            <div class="mode-btn yellow" id="btn-team-amarelo" onclick="selectTeam('amarelo')">TIME AMARELO</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>SUA FUNÇÃO</label>
+          <div class="mode-btn-grid">
+            <div class="mode-btn active role" id="btn-role-observador" onclick="selectRole('observador')">👁️ OBSERVADOR</div>
+            <div class="mode-btn role" id="btn-role-jogador" onclick="selectRole('jogador')">🎮 JOGADOR</div>
+          </div>
+        </div>
+
+        <button class="primary" id="btn-start" onclick="iniciarJogo()">ENTRAR NA MESA</button>
+        <button class="rules-btn" onclick="openRulesModal()">📖 REGRAS DO JOGO</button>
+      </div>
+
+      <div class="public-rooms-panel">
+        <div class="panel-title">
+          <span>SALAS DISPONÍVEIS</span>
+          <span style="font-size: 0.75rem; color: #a8a29e;">AO VIVO</span>
+        </div>
+        <div class="rooms-list" id="public-rooms-list">
+          <div style="text-align: center; color: #776655; font-size: 0.85rem; margin-top: 20px;">
+            Nenhuma sala ativa no momento.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA DA MESA DE JOGO -->
+  <div id="game-screen" class="screen hidden">
+    <div class="action-bar">
+      <button class="share-btn" onclick="copyShareLink()">🔗 LINK DA SALA</button>
+      <button class="leave-btn" onclick="leaveRoom()">🚪 SAIR DA SALA</button>
+    </div>
+
+    <!-- PAINEL DE ESPERA -->
+    <div id="waiting-panel" class="waiting-banner hidden">
+      <h2 id="waiting-title">⏳ AGUARDANDO JOGADORES...</h2>
+      <p id="waiting-sub">A partida iniciará automaticamente assim que todos entrarem!</p>
+    </div>
+
+    <!-- TELA DE DISPUTA DO PEDRA, PAPEL OU TESOURA -->
+    <div id="jokenpo-panel" class="waiting-banner hidden">
+      <h2>✊✌️✋ PEDRA, PAPEL OU TESOURA</h2>
+      <p id="jokenpo-status-text">Os Observadores de cada time estão decidindo quem vai ter a escolha do primeiro turno!</p>
+      <div id="jokenpo-controls" class="jokenpo-box hidden">
+        <button class="jokenpo-btn" onclick="sendJokenpoChoice('pedra')">✊ PEDRA</button>
+        <button class="jokenpo-btn" onclick="sendJokenpoChoice('papel')">✋ PAPEL</button>
+        <button class="jokenpo-btn" onclick="sendJokenpoChoice('tesoura')">✌️ TESOURA</button>
+      </div>
+    </div>
+
+    <!-- DECISÃO DO VENCEDOR -->
+    <div id="starter-choice-panel" class="waiting-banner hidden">
+      <h2 style="color: var(--success-green);">🎉 VOCÊ VENCEU NO PEDRA, PAPEL OU TESOURA!</h2>
+      <p style="margin-bottom: 12px;">Escolha quem começa o jogo (a equipe que começar terá 8 cartas para encontrar):</p>
+      <div class="jokenpo-box">
+        <button class="primary" style="width: auto;" onclick="chooseStarterTeam(player.team)">SEU TIME COMEÇA (8 Cartas)</button>
+        <button class="secondary" style="width: auto;" onclick="chooseStarterTeam(player.team === 'azul' ? 'amarelo' : 'azul')">PASSAR A VEZ (7 Cartas)</button>
+      </div>
+    </div>
+
+    <div class="game-layout hidden" id="main-game-layout">
+      <div class="team-panel blue-side">
+        <div class="team-header blue" id="left-team-header">EQUIPE DUPLA</div>
+        <div id="blue-players-list" style="width: 100%; display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+
+      <div class="center-board">
+        <header>
+          <div id="turn-badge" class="turn-badge turn-blue">TURNO ATIVO</div>
+          <div class="scoreboard">
+            <div class="score-card score-blue"><span id="blue-score-label">AZUL</span><span id="blue-count" class="score-number">7</span></div>
+            <div class="score-card score-yellow"><span id="yellow-score-label">AMARELO</span><span id="yellow-count" class="score-number">7</span></div>
+          </div>
+        </header>
+
+        <div class="clue-banner" id="clue-banner">Aguardando dica do Observador...</div>
+
+        <div id="observer-panel-wrapper" class="observer-panel-wrapper hidden">
+          <div class="clue-tip-box">
+            💡 <strong>Dica de Mestre:</strong> Tente usar uma palavra que conecte <strong>duas ou mais imagens</strong> para acertar mais rápido!
+          </div>
+          <div class="observer-panel">
+            <input type="text" id="clue-word" placeholder="Sua palavra-dica..." maxlength="20">
+            <select id="clue-number">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button class="primary" style="width: auto; padding: 8px 16px; font-size: 0.85rem;" onclick="sendClue()">Enviar Dica</button>
+          </div>
+        </div>
+
+        <main class="grid" id="board"></main>
+        <div class="history-log" id="history-log"></div>
+      </div>
+
+      <div class="team-panel yellow-side">
+        <div class="team-header yellow" id="right-team-header">SISTEMA</div>
+        <div id="yellow-players-list" style="width: 100%; display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE COMO JOGAR -->
+  <div id="rules-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-title" style="color: var(--gold-glow);">COMO JOGAR</div>
+      <div class="modal-subtitle">
+        <p><strong>🤝 Modo Co-Op (2 Jogadores):</strong><br>
+        • A dupla tenta revelar as 7 cartas dos Agentes (Azuis) antes do Sistema atingir as dele!<br>
+        • Clicar em carta Amarela dá ponto pro Sistema. A Preta (Bomba) perde o jogo na hora!</p><br>
+
+        <p><strong>⚔️ Modo Confronto (4 Jogadores - 2v2):</strong><br>
+        • A partida só inicia quando os **4 jogadores entrarem na sala**.<br>
+        • Os 2 Observadores disputam **Pedra, Papel ou Tesoura**. O vencedor escolhe quem começa.<br>
+        • **Vantagem Balanceada:** A equipe que começar tem **8 cartas** para acertar, enquanto a segunda equipe tem **7 cartas**.</p>
+      </div>
+      <div class="modal-buttons">
+        <button class="primary" onclick="closeRulesModal()">ENTENDI, VAMOS JOGAR!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE FIM DE JOGO -->
+  <div id="game-over-modal" class="modal-overlay hidden">
+    <div class="modal-card" id="modal-card">
+      <div class="modal-title" id="modal-title">FIM DE JOGO!</div>
+      <div class="modal-subtitle" id="modal-subtitle">Resultado da partida.</div>
+      <div class="modal-buttons">
+        <button class="primary" onclick="restartGame()">REINICIAR MESMA PARTIDA</button>
+        <button class="secondary" onclick="backToLobby()">VOLTAR AO MENU INICIAL</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+    let player = {};
+    let roomId = '';
+    let selectedAvatarId = 1;
+    let roomPlayers = [];
+    let selectedGameMode = 'dupla';
+    let selectedPrivacy = 'publica';
+    let selectedTeam = 'azul';
+    let selectedRole = 'observador';
+    let currentGameMode = 'dupla';
+    let currentTurnState = 'jogadores';
+    let activeClueState = null;
+
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('sala');
+      if (roomParam) {
+        document.getElementById('room-id').value = roomParam;
+      }
+      checkRoomStatus();
+      socket.emit('get_public_rooms');
+    };
+
+    function openRulesModal() { document.getElementById('rules-modal').classList.remove('hidden'); }
+    function closeRulesModal() { document.getElementById('rules-modal').classList.add('hidden'); }
+
+    function selectGameMode(mode) {
+      selectedGameMode = mode;
+      document.getElementById('btn-mode-dupla').classList.toggle('active', mode === 'dupla');
+      document.getElementById('btn-mode-confronto').classList.toggle('active', mode === 'confronto');
+
+      const teamGroup = document.getElementById('team-group');
+      if (mode === 'confronto') {
+        teamGroup.classList.remove('hidden');
+      } else {
+        teamGroup.classList.add('hidden');
+      }
+      checkRoomStatus();
+    }
+
+    function selectPrivacy(type) {
+      selectedPrivacy = type;
+      document.getElementById('btn-type-publica').classList.toggle('active', type === 'publica');
+      document.getElementById('btn-type-privada').classList.toggle('active', type === 'privada');
+
+      const pwdGroup = document.getElementById('password-group');
+      if (type === 'privada') pwdGroup.classList.remove('hidden');
+      else pwdGroup.classList.add('hidden');
+    }
+
+    function selectTeam(team) {
+      selectedTeam = team;
+      document.getElementById('btn-team-azul').classList.toggle('active', team === 'azul');
+      document.getElementById('btn-team-amarelo').classList.toggle('active', team === 'amarelo');
+      checkRoomStatus();
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('btn-role-observador').classList.toggle('active', role === 'observador');
+      document.getElementById('btn-role-jogador').classList.toggle('active', role === 'jogador');
+    }
+
+    function tryNextImg(imgEl, basePath) {
+      const cleanPath = basePath.replace(/\.(png|jpg|jpeg)$/i, '');
+      if (!imgEl.dataset.step) {
+        imgEl.dataset.step = '1'; imgEl.src = cleanPath + '.jpg';
+      } else if (imgEl.dataset.step === '1') {
+        imgEl.dataset.step = '2'; imgEl.src = cleanPath + '.jpeg';
+      } else if (imgEl.dataset.step === '2') {
+        imgEl.dataset.step = '3'; imgEl.src = cleanPath + '.png.png';
+      } else if (imgEl.dataset.step === '3') {
+        imgEl.dataset.step = '4'; imgEl.src = cleanPath + '.png.jpg';
+      }
+    }
+
+    function selectAvatar(id) {
+      selectedAvatarId = id;
+      document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+      document.getElementById(`av-${id}`).classList.add('selected');
+    }
+
+    function checkRoomStatus() {
+      const rId = document.getElementById('room-id').value.trim();
+      if (rId) {
+        socket.emit('get_room_slots', { roomId: rId });
+      }
+    }
+
+    socket.on('room_slots_info', ({ occupiedSlots, isFull, isPrivate, gameMode }) => {
+      const btnStart = document.getElementById('btn-start');
+      const btnObs = document.getElementById('btn-role-observador');
+      const btnPlayer = document.getElementById('btn-role-jogador');
+
+      btnObs.classList.remove('disabled');
+      btnPlayer.classList.remove('disabled');
+      btnStart.disabled = false;
+      btnStart.innerText = "ENTRAR NA MESA";
+
+      btnObs.innerText = "👁️ OBSERVADOR";
+      btnPlayer.innerText = "🎮 JOGADOR";
+
+      if (gameMode) {
+        selectGameMode(gameMode);
+      }
+
+      if (isPrivate) {
+        selectPrivacy('privada');
+      }
+
+      if (isFull) {
+        btnStart.disabled = true;
+        btnStart.innerText = selectedGameMode === 'dupla' ? "SALA CHEIA (2/2)" : "SALA CHEIA (4/4)";
+        return;
+      }
+
+      const slots = occupiedSlots || [];
+
+      if (selectedGameMode === 'dupla') {
+        const obsOccupied = slots.some(s => s.role === 'observador');
+        const playerOccupied = slots.some(s => s.role === 'jogador');
+
+        if (obsOccupied) {
+          btnObs.classList.add('disabled');
+          btnObs.innerText = "👁️ OBSERVADOR [OCUPADO]";
+          if (selectedRole === 'observador') selectRole('jogador');
+        }
+
+        if (playerOccupied) {
+          btnPlayer.classList.add('disabled');
+          btnPlayer.innerText = "🎮 JOGADOR [OCUPADO]";
+          if (selectedRole === 'jogador') selectRole('observador');
+        }
+      } else {
+        const obsOccupied = slots.some(s => s.team === selectedTeam && s.role === 'observador');
+        const playerOccupied = slots.some(s => s.team === selectedTeam && s.role === 'jogador');
+
+        if (obsOccupied) {
+          btnObs.classList.add('disabled');
+          btnObs.innerText = "👁️ OBSERVADOR [OCUPADO]";
+          if (selectedRole === 'observador') selectRole('jogador');
+        }
+
+        if (playerOccupied) {
+          btnPlayer.classList.add('disabled');
+          btnPlayer.innerText = "🎮 JOGADOR [OCUPADO]";
+          if (selectedRole === 'jogador') selectRole('observador');
+        }
+      }
+    });
+
+    socket.on('public_rooms_list', (rooms) => {
+      const listEl = document.getElementById('public-rooms-list');
+      if (!rooms || rooms.length === 0) {
+        listEl.innerHTML = `<div style="text-align: center; color: #776655; font-size: 0.85rem; margin-top: 20px;">Nenhuma sala ativa no momento.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      rooms.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'room-item';
+        const typeIcon = r.isPrivate ? '🔒' : '🌐';
+        const modeLabel = r.gameMode === 'confronto' ? 'VS (4P)' : 'Co-op (2P)';
+        item.innerHTML = `
+          <div class="room-info">
+            <div class="room-name">${typeIcon} ${r.id} <span style="color:var(--gold-glow); font-size:0.75rem;">[${modeLabel}]</span></div>
+            <div class="room-creator">Criador: ${r.creatorName}</div>
+            <div class="room-badge">${r.playersCount}/${r.maxPlayers} Jogadores</div>
+          </div>
+          <button class="btn-join-public" onclick="joinFromList('${r.id}', ${r.isPrivate})">Entrar</button>
+        `;
+        listEl.appendChild(item);
+      });
+    });
+
+    function joinFromList(rId, isPrivate) {
+      document.getElementById('room-id').value = rId;
+
+      if (isPrivate) {
+        selectPrivacy('privada');
+        const pwd = prompt(`A sala "${rId}" é FECHADA 🔒. Digite a senha para entrar:`);
+        if (pwd !== null) {
+          document.getElementById('room-password').value = pwd;
+          iniciarJogo();
+        }
+      } else {
+        selectPrivacy('publica');
+        iniciarJogo();
+      }
+    }
+
+    function copyShareLink() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(roomId)}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert('🔗 Link da sala copiado! Envie para os seus amigos.');
+      }).catch(() => {
+        alert(`Copie o link da sala: ${shareUrl}`);
+      });
+    }
+
+    function leaveRoom() {
+      if (confirm('Tem certeza que deseja sair da sala?')) {
+        socket.emit('leave_room', { roomId });
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('lobby-screen').classList.remove('hidden');
+        checkRoomStatus();
+        socket.emit('get_public_rooms');
+      }
+    }
+
+    function iniciarJogo() {
+      const nameInput = document.getElementById('player-name');
+      const roomInput = document.getElementById('room-id');
+
+      if (!nameInput || !roomInput) return;
+
+      const name = nameInput.value.trim();
+      roomId = roomInput.value.trim();
+      const password = document.getElementById('room-password').value.trim();
+
+      if (!name || !roomId) { alert('Preencha seu nome e a sala!'); return; }
+      if (selectedPrivacy === 'privada' && !password) { alert('Digite uma senha para a sala fechada!'); return; }
+
+      player = {
+        name,
+        gameMode: selectedGameMode,
+        team: selectedGameMode === 'dupla' ? 'azul' : selectedTeam,
+        role: selectedRole,
+        avatarId: selectedAvatarId
+      };
+
+      socket.emit('join_room', { 
+        roomId, 
+        playerName: player.name, 
+        gameMode: player.gameMode,
+        team: player.team, 
+        role: player.role, 
+        avatarId: player.avatarId, 
+        isPrivate: selectedPrivacy === 'privada',
+        password
+      });
+    }
+
+    socket.on('init_state', ({ room }) => {
+      currentGameMode = room.gameMode;
+      roomPlayers = room.players || [];
+
+      document.getElementById('lobby-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+
+      if (room.status === 'waiting') {
+        showWaitingPanel(room);
+      }
+    });
+
+    socket.on('room_waiting_state', ({ room }) => {
+      showWaitingPanel(room);
+    });
+
+    socket.on('start_jokenpo_phase', ({ room }) => {
+      document.getElementById('waiting-panel').classList.add('hidden');
+      document.getElementById('main-game-layout').classList.add('hidden');
+      document.getElementById('starter-choice-panel').classList.add('hidden');
+      document.getElementById('jokenpo-panel').classList.remove('hidden');
+
+      if (player.role === 'observador') {
+        document.getElementById('jokenpo-controls').classList.remove('hidden');
+        document.getElementById('jokenpo-status-text').innerText = "Escolha sua jogada no Pedra, Papel ou Tesoura contra o Observador inimigo:";
+      } else {
+        document.getElementById('jokenpo-controls').classList.add('hidden');
+        document.getElementById('jokenpo-status-text').innerText = "Aguardando os Observadores definirem o primeiro turno no Pedra, Papel ou Tesoura...";
+      }
+    });
+
+    function sendJokenpoChoice(choice) {
+      socket.emit('send_jokenpo_choice', { roomId, choice });
+      document.getElementById('jokenpo-controls').classList.add('hidden');
+      document.getElementById('jokenpo-status-text').innerText = "Jogada enviada! Aguardando a escolha do outro Observador...";
+    }
+
+    socket.on('jokenpo_draw', () => {
+      if (player.role === 'observador') {
+        document.getElementById('jokenpo-controls').classList.remove('hidden');
+        document.getElementById('jokenpo-status-text').innerText = "Deu EMPATE! Escolha sua nova jogada:";
+      }
+    });
+
+    socket.on('jokenpo_result', ({ winnerTeam, winnerName }) => {
+      document.getElementById('jokenpo-panel').classList.add('hidden');
+
+      if (player.role === 'observador' && player.team === winnerTeam) {
+        document.getElementById('starter-choice-panel').classList.remove('hidden');
+      } else {
+        document.getElementById('waiting-panel').classList.remove('hidden');
+        document.getElementById('waiting-title').innerText = `🏆 ${winnerName} VENCEU NO PEDRA, PAPEL OU TESOURA!`;
+        document.getElementById('waiting-sub').innerText = `Aguardando ele decidir quem iniciará jogando...`;
+      }
+    });
+
+    function chooseStarterTeam(starterTeam) {
+      socket.emit('choose_starter_team', { roomId, starterTeam });
+      document.getElementById('starter-choice-panel').classList.add('hidden');
+    }
+
+    socket.on('game_ready', ({ room }) => {
+      currentGameMode = room.gameMode;
+      roomPlayers = room.players || [];
+      currentTurnState = room.currentTurn;
+      activeClueState = room.activeClue;
+
+      document.getElementById('waiting-panel').classList.add('hidden');
+      document.getElementById('jokenpo-panel').classList.add('hidden');
+      document.getElementById('starter-choice-panel').classList.add('hidden');
+      document.getElementById('main-game-layout').classList.remove('hidden');
+
+      const board = document.getElementById('board');
+      if (player.role === 'observador') {
+        board.classList.add('is-observer');
+      } else {
+        board.classList.remove('is-observer');
+      }
+
+      setupGameScreenUI();
+      renderBoard(room.cards);
+      updateClueBanner(room.activeClue, room.clicksRemaining);
+      renderPlayersList();
+      toggleObserverPanel();
+    });
+
+    socket.on('update_players', (players) => {
+      roomPlayers = players;
+      renderPlayersList();
+      checkRoomStatus();
+    });
+
+    socket.on('clue_updated', ({ clue, clicksRemaining }) => {
+      activeClueState = clue;
+      updateClueBanner(clue, clicksRemaining);
+      renderPlayersList();
+      toggleObserverPanel();
+    });
+
+    socket.on('card_revealed', ({ cardId, type, clicksRemaining }) => {
+      const cardEl = document.getElementById(`card-${cardId}`);
+      if (cardEl) cardEl.classList.add(`revealed-${type}`);
+
+      const banner = document.getElementById('clue-banner');
+      if (banner.innerHTML.includes('Tentativas restantes')) {
+        banner.innerHTML = banner.innerHTML.replace(/Tentativas restantes: <strong>\d+<\/strong>/, `Tentativas restantes: <strong>${clicksRemaining}</strong>`);
+      }
+
+      updateCounters();
+    });
+
+    socket.on('turn_changed', ({ currentTurn }) => {
+      currentTurnState = currentTurn;
+      activeClueState = null;
+      renderPlayersList();
+      toggleObserverPanel();
+
+      if (currentGameMode === 'dupla') {
+        if (player.role === 'observador') {
+          document.getElementById('clue-banner').innerHTML = `👉 <strong>SUA VEZ:</strong> Envie uma palavra e a quantidade de cartas!`;
+        } else {
+          document.getElementById('clue-banner').innerHTML = `⏳ Aguardando seu Observador enviar a dica...`;
+        }
+      } else {
+        const badge = document.getElementById('turn-badge');
+        badge.innerText = `TURNO DO TIME ${currentTurn.toUpperCase()}`;
+        badge.className = `turn-badge turn-${currentTurn}`;
+
+        const isMyTurn = (player.team === currentTurn);
+        if (isMyTurn) {
+          document.getElementById('clue-banner').innerHTML = player.role === 'observador' 
+            ? `👉 <strong>SUA VEZ:</strong> Envie uma palavra e a quantidade de cartas no painel!` 
+            : `⏳ Aguardando seu Observador enviar a dica...`;
+        } else {
+          document.getElementById('clue-banner').innerHTML = `Turno da equipe ${currentTurn.toUpperCase()}. Aguardando dica...`;
+        }
+      }
+    });
+
+    socket.on('log_message', (msg) => {
+      const log = document.getElementById('history-log');
+      const item = document.createElement('div');
+      item.className = 'log-item';
+      item.innerHTML = msg;
+      log.prepend(item);
+    });
+
+    socket.on('error_message', (msg) => alert(msg));
+
+    socket.on('game_over', ({ winner }) => {
+      const modal = document.getElementById('game-over-modal');
+      const modalCard = document.getElementById('modal-card');
+      const modalTitle = document.getElementById('modal-title');
+      const modalSubtitle = document.getElementById('modal-subtitle');
+
+      if (currentGameMode === 'dupla') {
+        if (winner === 'jogadores') {
+          modalCard.className = 'modal-card victory';
+          modalTitle.innerText = 'VOCÊS VENCERAM! 🎉';
+          modalSubtitle.innerText = `Sua dupla revelou todas as cartas dos Agentes com sucesso!`;
+        } else {
+          modalCard.className = 'modal-card defeat';
+          modalTitle.innerText = 'VOCÊS PERDERAM! 💥';
+          modalSubtitle.innerText = `O Sistema venceu a partida desta vez. Tente novamente!`;
+        }
+      } else {
+        const isMyTeamWinner = (player.team === winner);
+        if (isMyTeamWinner) {
+          modalCard.className = 'modal-card victory';
+          modalTitle.innerText = 'SEU TIME VENCEU! 🎉';
+          modalSubtitle.innerText = `A equipe ${winner.toUpperCase()} revelou todas as cartas com sucesso!`;
+        } else {
+          modalCard.className = 'modal-card defeat';
+          modalTitle.innerText = 'SEU TIME PERDEU! 💥';
+          modalSubtitle.innerText = `A equipe adversária (${winner.toUpperCase()}) venceu a partida.`;
+        }
+      }
+
+      modal.classList.remove('hidden');
+    });
+
+    function showWaitingPanel(room) {
+      document.getElementById('main-game-layout').classList.add('hidden');
+      document.getElementById('jokenpo-panel').classList.add('hidden');
+      document.getElementById('starter-choice-panel').classList.add('hidden');
+      document.getElementById('waiting-panel').classList.remove('hidden');
+
+      const current = room.players.length;
+      const max = room.gameMode === 'dupla' ? 2 : 4;
+
+      document.getElementById('waiting-title').innerText = `⏳ AGUARDANDO JOGADORES... (${current}/${max})`;
+      document.getElementById('waiting-sub').innerText = `A partida começará assim que a sala estiver cheia!`;
+    }
+
+    function setupGameScreenUI() {
+      const badge = document.getElementById('turn-badge');
+      const blueLabel = document.getElementById('blue-score-label');
+      const yellowLabel = document.getElementById('yellow-score-label');
+      const leftHeader = document.getElementById('left-team-header');
+      const rightHeader = document.getElementById('right-team-header');
+
+      if (currentGameMode === 'dupla') {
+        badge.innerText = 'DUPLA VS SISTEMA';
+        badge.className = 'turn-badge turn-blue';
+        blueLabel.innerText = 'SUA DUPLA';
+        yellowLabel.innerText = 'SISTEMA 🤖';
+        leftHeader.innerText = 'EQUIPE DUPLA';
+        rightHeader.innerText = 'SISTEMA';
+      } else {
+        badge.innerText = `TURNO DO TIME ${currentTurnState.toUpperCase()}`;
+        badge.className = `turn-badge turn-${currentTurnState}`;
+        blueLabel.innerText = 'TIME AZUL';
+        yellowLabel.innerText = 'TIME AMARELO';
+        leftHeader.innerText = 'TIME AZUL';
+        rightHeader.innerText = 'TIME AMARELO';
+      }
+    }
+
+    function sendClue() {
+      const word = document.getElementById('clue-word').value.trim();
+      const number = document.getElementById('clue-number').value;
+
+      if (!word) { alert('Digite uma palavra!'); return; }
+      socket.emit('send_clue', { roomId, playerName: player.name, team: player.team, word, number });
+      document.getElementById('clue-word').value = '';
+    }
+
+    function clickCard(cardId) {
+      if (player.role === 'observador') { alert('Observadores não podem clicar nas cartas!'); return; }
+      socket.emit('click_card', { roomId, cardId, playerName: player.name, team: player.team });
+    }
+
+    function restartGame() {
+      document.getElementById('game-over-modal').classList.add('hidden');
+      socket.emit('restart_game', { roomId });
+    }
+
+    function backToLobby() {
+      document.getElementById('game-over-modal').classList.add('hidden');
+      socket.emit('leave_room', { roomId });
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('lobby-screen').classList.remove('hidden');
+      checkRoomStatus();
+      socket.emit('get_public_rooms');
+    }
+
+    function renderBoard(cards) {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+
+      cards.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `card type-${card.type}`;
+        if (card.revealed) cardEl.classList.add(`revealed-${card.type}`);
+        cardEl.id = `card-${card.id}`;
+        cardEl.onclick = () => clickCard(card.id);
+
+        const imgEl = document.createElement('img');
+        imgEl.src = card.imageUrl;
+        imgEl.alt = card.nome;
+        imgEl.onerror = function() { tryNextImg(this, card.imageUrl); };
+
+        cardEl.appendChild(imgEl);
+        board.appendChild(cardEl);
+      });
+
+      updateCounters();
+    }
+
+    function renderPlayersList() {
+      const blueContainer = document.getElementById('blue-players-list');
+      const yellowContainer = document.getElementById('yellow-players-list');
+
+      blueContainer.innerHTML = '';
+      yellowContainer.innerHTML = '';
+
+      if (currentGameMode === 'dupla') {
+        roomPlayers.forEach(p => {
+          const avatarPath = `avatares/avatar_${p.avatarId || 1}`;
+          const isThisPlayerTurn = (!activeClueState && p.role === 'observador') || (activeClueState && p.role === 'jogador');
+
+          const activeClass = isThisPlayerTurn ? 'active-turn' : '';
+          const turnBadgeText = (p.name === player.name) ? 'SUA VEZ' : 'VEZ DELE';
+          const turnBadgeHtml = isThisPlayerTurn ? `<div class="turn-badge-player">${turnBadgeText}</div>` : '';
+
+          const cardHtml = `
+            <div class="player-card ${activeClass}">
+              ${turnBadgeHtml}
+              <div class="avatar-box">
+                <img src="${avatarPath}.png" alt="${p.name}" onerror="tryNextImg(this, '${avatarPath}')">
+              </div>
+              <div class="name">${p.name}</div>
+              <div class="role-badge">${p.role.toUpperCase()}</div>
+            </div>`;
+
+          blueContainer.innerHTML += cardHtml;
+        });
+
+        yellowContainer.innerHTML = `
+          <div class="player-card">
+            <div class="avatar-box"><img src="avatares/bot.png" alt="Sistema" onerror="tryNextImg(this, 'avatares/bot')"></div>
+            <div class="name">SISTEMA 🤖</div>
+            <div class="role-badge">OPONENTE</div>
+          </div>`;
+      } else {
+        roomPlayers.forEach(p => {
+          const avatarPath = `avatares/avatar_${p.avatarId || 1}`;
+          const isThisPlayerTurn = (p.team === currentTurnState) && 
+            ((!activeClueState && p.role === 'observador') || (activeClueState && p.role === 'jogador'));
+
+          const activeClass = isThisPlayerTurn ? 'active-turn' : '';
+          const turnBadgeText = (p.name === player.name) ? 'SUA VEZ' : 'VEZ DELE';
+          const turnBadgeHtml = isThisPlayerTurn ? `<div class="turn-badge-player">${turnBadgeText}</div>` : '';
+
+          const cardHtml = `
+            <div class="player-card ${activeClass}">
+              ${turnBadgeHtml}
+              <div class="avatar-box">
+                <img src="${avatarPath}.png" alt="${p.name}" onerror="tryNextImg(this, '${avatarPath}')">
+              </div>
+              <div class="name">${p.name}</div>
+              <div class="role-badge">${p.role.toUpperCase()}</div>
+            </div>`;
+
+          if (p.team === 'azul') blueContainer.innerHTML += cardHtml;
+          else yellowContainer.innerHTML += cardHtml;
+        });
+      }
+    }
+
+    function toggleObserverPanel() {
+      const panelWrapper = document.getElementById('observer-panel-wrapper');
+      const isMyTurnTeam = (currentGameMode === 'dupla') || (currentTurnState === player.team);
+      const isObserver = (player.role === 'observador');
+
+      if (isMyTurnTeam && isObserver && !activeClueState) {
+        panelWrapper.classList.remove('hidden');
+      } else {
+        panelWrapper.classList.add('hidden');
+      }
+    }
+
+    function updateClueBanner(clue, clicksRemaining) {
+      const banner = document.getElementById('clue-banner');
+      if (clue) {
+        banner.innerHTML = `Dica Atual: <span class="clue-word-highlight">"${clue.word}"</span> para <strong>${clue.number}</strong> carta(s) | Tentativas restantes: <strong>${clicksRemaining}</strong>`;
+      } else {
+        banner.innerHTML = 'Aguardando dica do Observador...';
+      }
+    }
+
+    function updateCounters() {
+      const blueLeft = document.querySelectorAll('.card.type-azul:not(.revealed-azul)').length;
+      const yellowLeft = document.querySelectorAll('.card.type-amarelo:not(.revealed-amarelo)').length;
+
+      document.getElementById('blue-count').innerText = blueLeft;
+      document.getElementById('yellow-count').innerText = yellowLeft;
+    }
+  </script>
+</body>
+</html>
