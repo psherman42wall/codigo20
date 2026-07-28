@@ -156,7 +156,6 @@
     .history-log { background: rgba(20, 14, 10, 0.85); border: 1px solid #443228; border-radius: 8px; padding: 8px 12px; width: 100%; max-height: 80px; overflow-y: auto; font-size: 0.78rem; color: #a8a29e; }
     .log-item { margin-bottom: 3px; }
 
-    /* ESTILOS PEDRA, PAPEL OU TESOURA E PAINEL DE ESPERA */
     .waiting-banner {
       background: rgba(217, 119, 6, 0.2); border: 2px dashed var(--gold-glow);
       padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; width: 100%;
@@ -170,7 +169,6 @@
     }
     .jokenpo-btn:hover { background: var(--gold-accent); transform: scale(1.08); }
 
-    /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 999; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .modal-card { background: rgba(20, 14, 10, 0.95); border: 2px solid var(--gold-accent); border-radius: 20px; padding: 28px 20px; width: 90%; max-width: 460px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; max-height: 85vh; overflow-y: auto; }
@@ -181,12 +179,6 @@
     .modal-card.defeat .modal-title { color: #f87171; text-shadow: 0 0 15px rgba(248, 113, 113, 0.4); }
     .modal-subtitle { color: #d6d3d1; font-size: 0.88rem; line-height: 1.5; text-align: left; }
     .modal-buttons { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px; }
-
-    /* AJUSTE LEVE PARA CELULAR NÃO QUEBRAR O LAYOUT */
-    @media (max-width: 600px) {
-      .grid { gap: 6px; }
-      .card { padding: 4px; }
-    }
   </style>
 </head>
 <body>
